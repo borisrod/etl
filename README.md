@@ -37,6 +37,10 @@ Features
 
  * Console command will read yaml configurations and run the processor
 
+   ```bash
+   ./demo/console antimattr:etl:execute mongodb_mysql sellables,products
+   ```
+
 Model
 =====
 

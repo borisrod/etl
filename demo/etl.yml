@@ -1,6 +1,7 @@
 imports:
   - { resource: "logger.yml" }
   - { resource: "transformers.yml" }
+  - { resource: "task_products.yml" }
   - { resource: "task_sellables.yml" }
 
 parameters:
@@ -46,6 +47,7 @@ services:
     class: Doctrine\Common\Collections\ArrayCollection
     public: false
     arguments:
+      - { products: @antimattr.etl_task.products }
       - { sellables: @antimattr.etl_task.sellables }
 
   # Processors

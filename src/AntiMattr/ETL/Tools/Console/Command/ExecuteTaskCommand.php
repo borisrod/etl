@@ -41,7 +41,7 @@ class ExecuteTaskCommand extends AbstractETLCommand
         parent::configure();
         $this
             ->addArgument(
-                'task',
+                'tasks',
                 InputArgument::REQUIRED
             )
         ;
@@ -56,7 +56,10 @@ class ExecuteTaskCommand extends AbstractETLCommand
         $processor = $input->getArgument('processor');
         $this->processor = $this->container->get($processor);
 
-        $task = $input->getArgument('task');
-        $this->processor->executeTask($task);
+        $tasks = explode(',', $input->getArgument('tasks'));
+
+        foreach ($tasks as $task) {
+            $this->processor->executeTask($task);
+        }
     }
 }
