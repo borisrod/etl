@@ -1,0 +1,21 @@
+#!/usr/bin/env php
+<?php
+
+require_once __DIR__ . '/../vendor/autoload.php';
+
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\Config\FileLocator;
+use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
+
+$container = new ContainerBuilder();
+$loader = new YamlFileLoader($container, new FileLocator(__DIR__));
+$loader->load('etl.yml');
+
+// The Command
+$command = new AntiMattr\ETL\Tools\Console\Command\ExecuteTaskCommand();
+$command->setContainer($container);
+
+// The console app
+$console = new Symfony\Component\Console\Application('AntiMattr ETL', '1.0');
+$console->add($command);
+$console->run();

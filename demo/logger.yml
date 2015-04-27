@@ -1,0 +1,10 @@
+services:
+  # Monolog
+  stream_handler:
+    class: Monolog\Handler\StreamHandler
+    arguments: [ "%antimattr.etl_log.path%", "%antimattr.etl_log.level%" ]
+  logger:
+    class: Monolog\Logger
+    arguments: [ 'logger' ]
+    calls:
+      - [ 'pushHandler', [ @stream_handler ] ]

@@ -1,0 +1,20 @@
+services:
+  # Transformers
+  antimattr.etl_transformer.mongodb.mongodate:
+    class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoDateTransformer
+    properties:
+      options: { 'format': 'Y-m-d H:i:s', 'timezone': 'EST' }
+  antimattr.etl_transformer.mongodb.mongoboolean:
+    class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoBooleanTransformer
+    properties:
+      options: { 'true': 1, 'false': 0 }
+  antimattr.etl_transformer.mongodb.mongoid:
+    class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoIdTransformer
+  antimattr.etl_transformer.mongodb.mongodbref:
+    class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoDBRefTransformer
+  antimattr.etl_transformer.scalar.html_utf8:
+    class: AntiMattr\ETL\Transform\Transformer\Scalar\HTMLToUTF8Transformer
+  antimattr.etl_transformer.scalar.maxlength:
+    class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
+  antimattr.etl_transformer.noop:
+    class: AntiMattr\ETL\Transform\Transformer\NoopTransformer

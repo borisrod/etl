@@ -1,0 +1,57 @@
+imports:
+  - { resource: "logger.yml" }
+  - { resource: "transformers.yml" }
+  - { resource: "task_sellables.yml" }
+
+parameters:
+  antimattr.mongodb_extractor.class: AntiMattr\ETL\Extract\MongoDBExtractor
+  antimattr.etl_processor_factory.class: AntiMattr\ETL\ProcessorFactory
+  antimattr.etl_processor.class: AntiMattr\ETL\Processor
+  antimattr.etl_task_common.class: AntiMattr\ETL\Task\CommonTask
+  antimattr.etl_transformation_common.class: AntiMattr\ETL\Transform\CommonTransformation
+  doctrine.array_collection.class: Doctrine\Common\Collections\ArrayCollection
+  antimattr.etl_log.path: 'demo/logs/etl.log'
+  antimattr.etl_log.level: 'debug'
+  antimattr.etl_mongodb_connection.server: 'mongodb://localhost:27017'
+  antimattr.etl_mongodb_connection.options: []
+  antimattr.etl_mongodb_connection.driver_options: []
+  antimattr.etl_mysql_connection.dsn: 'mysql:dbname=jetstream_mongo;host=localhost'
+  antimattr.etl_mysql_connection.username: 'root'
+  antimattr.etl_mysql_connection.password: ~
+
+services:
+  # Connections
+  antimattr.etl_mongodb_connection:
+    class: MongoClient
+    public: false
+    arguments:
+      - "%antimattr.etl_mongodb_connection.server%"
+      - "%antimattr.etl_mongodb_connection.options%"
+      - "%antimattr.etl_mongodb_connection.driver_options%"
+  antimattr.etl_mongodb_database:
+    class: MongoDB
+    public: false
+    factory: [ @antimattr.etl_mongodb_connection, 'selectDB' ]
+    arguments: [ 'opensky_devo' ]
+  antimattr.etl_mysql_connection:
+    class: PDO
+    public: false
+    arguments:
+      - "%antimattr.etl_mysql_connection.dsn%"
+      - "%antimattr.etl_mysql_connection.username%"
+      - "%antimattr.etl_mysql_connection.password%"
+
+  # Register task collection
+  antimattr.etl_tasks:
+    class: Doctrine\Common\Collections\ArrayCollection
+    public: false
+    arguments:
+      - { sellables: @antimattr.etl_task.sellables }
+
+  # Processors
+  mongodb_mysql:
+    class: "%antimattr.etl_processor.class%"
+    factory: [ "%antimattr.etl_processor_factory.class%", 'getProcessor' ]
+    arguments: [ 'mongodb_mysql', @logger ]
+    calls:
+      - [ 'setTasks', [ @antimattr.etl_tasks ] ]
