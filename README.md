@@ -1,9 +1,9 @@
 # DO NOT USE - IN DEVELOPMENT
 
-Search
-======
+ETL
+===
 
-AntiMattr ETL is a library that provides a common interface for Search backends.
+AntiMattr ETL is a library.
 
 Installation
 ============
