@@ -47,8 +47,9 @@ services:
     class: Doctrine\Common\Collections\ArrayCollection
     public: false
     arguments:
-      - { products: @antimattr.etl_task.products }
-      - { sellables: @antimattr.etl_task.sellables }
+      -
+        products: @antimattr.etl_task.products
+        sellables: @antimattr.etl_task.sellables
 
   # Processors
   mongodb_mysql:
