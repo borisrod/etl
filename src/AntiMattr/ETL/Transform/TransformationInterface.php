@@ -11,6 +11,7 @@
 
 namespace AntiMattr\ETL\Transform;
 
+use AntiMattr\ETL\Task\TaskInterface;
 use AntiMattr\ETL\Transform\Transformer\TransformerInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -58,12 +59,12 @@ interface TransformationInterface
     public function getName();
 
     /**
-     * @param \AntiMattr\ETL\Task\TaskTrait
+     * @param \AntiMattr\ETL\Task\TaskInterface
      */
-    public function setTask($task);
+    public function setTask(TaskInterface $task);
 
     /**
-     * @return \AntiMattr\ETL\Task\TaskTrait
+     * @return \AntiMattr\ETL\Task\TaskInterface
      */
     public function getTask();
 

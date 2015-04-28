@@ -1,0 +1,3 @@
+imports:
+  - { resource: "tasks/task_products.yml" }
+  - { resource: "tasks/task_sellables.yml" }

@@ -1,8 +1,8 @@
 {
     "name": "antimattr/etl",
     "type": "library",
-    "description": "ETL Processor",
-    "keywords": ["database", "etl", "extract", "load", "mongodb", "mysql", "transform", "warehouse"],
+    "description": "ETL processing for extracting, transforming, and loading data",
+    "keywords": ["database", "dependency injection", "etl", "extract", "load", "mongodb", "mysql", "transform", "warehouse"],
     "homepage": "http://github.com/antimattr/etl",
     "license": "MIT",
     "authors": [

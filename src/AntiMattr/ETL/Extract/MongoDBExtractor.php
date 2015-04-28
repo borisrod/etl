@@ -38,7 +38,6 @@ class MongoDBExtractor implements ExtractorInterface
         $this->db = $db;
         $this->query = $query;
         $this->pages = new ArrayCollection();
-        $this->perPage = 500;
         $this->projection = $projection;
     }
 

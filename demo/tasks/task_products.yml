@@ -4,6 +4,8 @@ services:
     class: "%antimattr.mongodb_extractor.class%"
     public: false
     arguments: [ @antimattr.etl_mongodb_database, 'products' ]
+    calls:
+      - [ 'setPerPage', [ 1500 ] ]
 
   # Loaders
   antimattr.etl_loader.products:

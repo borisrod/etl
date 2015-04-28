@@ -1,8 +1,7 @@
 imports:
   - { resource: "logger.yml" }
   - { resource: "transformers.yml" }
-  - { resource: "task_products.yml" }
-  - { resource: "task_sellables.yml" }
+  - { resource: "tasks.yml" }
 
 parameters:
   antimattr.mongodb_extractor.class: AntiMattr\ETL\Extract\MongoDBExtractor

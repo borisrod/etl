@@ -3,7 +3,7 @@
 ETL
 ===
 
-AntiMattr ETL is a library.
+AntiMattr ETL is a library for extracting, transforming, and loading data.
 
 Installation
 ============
@@ -29,7 +29,7 @@ If everything worked, the ETL can now be found at vendor/antimattr/etl.
 Features
 ========
 
- * Create a simplified interface for interaction with etl tasks
+ * A simplified interface for interaction with etl tasks
 
    ```php
    $processor->run($taskName, $options);
@@ -37,50 +37,127 @@ Features
 
  * Console command will read yaml configurations and run the processor
 
-   ```bash
-   ./demo/console antimattr:etl:execute mongodb_mysql sellables,products
-   ```
+    ```php
+    #!/usr/bin/env php
+    <?php
+
+    require_once __DIR__ . '/../vendor/autoload.php';
+
+    use Symfony\Component\DependencyInjection\ContainerBuilder;
+    use Symfony\Component\Config\FileLocator;
+    use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
+
+    $container = new ContainerBuilder();
+    $loader = new YamlFileLoader($container, new FileLocator(__DIR__));
+    $loader->load('etl.yml');
+
+    // The Command
+    $command = new AntiMattr\ETL\Tools\Console\Command\ExecuteTaskCommand();
+    $command->setContainer($container);
+
+    // The console app
+    $console = new Symfony\Component\Console\Application('AntiMattr ETL', '1.0');
+    $console->add($command);
+    $console->run();
+    ```
+
+    From the command line:
+
+    ```bash
+    ./demo/console antimattr:etl:execute mongodb_mysql sellables,products
+    ```
+
+ * Define your ETL recipe with Dependency Injection (see demo)
 
 Model
 =====
 
 ```javascript
-TaskTrait = {
-  extractor: ExtractorTrait,
-  loader: LoaderTrait,
-  transformations: [
-    TransformationTrait,
-  ],
+TaskInterface = {
+    function initialize();
+    function getData(); # return DataInterface
+    function setData(DataInterface);
+    function setDefaultTransformationClass(string);
+    function getExtractor(); # return ExtractorInterface
+    function setExtractor(ExtractorInterface);
+    function getLoader(); # return LoaderInterface
+    function setLoader(LoaderInterface);
+    function getOptions(); # return array
+    function setOptions(array);
+    function addTransformation(TransformationInterface);
+    function getTransformations(); # return Collection
+    function setTransformations(Collection);
 };
 
-ExtractorTrait = {
-  connection: Data Source Connection,
-  task: Parent Task,
-  extract: abstract method,
+ExtractorInterface = {
+    public function getPages(); # return Collection
+    public function setPerPage(integer);
+    public function setTask(TaskInterface);
+    public function getTask(); # return TaskInterface
+}
+
+LoaderInterface = {
+    public function load();
+    public function postLoad();
+    public function setTask(TaskInterface);
+    public function getTask(); # return TaskInterface
+}
+
+TransformationInterface = {
+    public function shouldContinue();
+    public function initialize(array);
+    public function postTransform();
+    public function getDefaultTransformerClass(); # return string
+    public function getDefaultValue(); # return mixed
+    public function getField(); # return string
+    public function getName(); # return string
+    public function setTask(TaskInterface);
+    public function getTask(); # return TaskInterface
+    public function addTransformer(TransformerInterface);
+    public function getTransformers(); # return Collection
+    public function setTransformers(Collection);
 };
 
-LoaderTrait = {
-  connection: Data Destination Connection,
-  task: Parent Task,
-  load: abstract method,
-  postLoad: abstract method,
+TransformerInterface = {
+    public function bind(mixed, TransformationInterface);
+    public function transform(mixed, TransformationInterface); # return mixed
 };
 
-TransformationTrait = {
-  field: string,
-  name: string (unique identifier),
-  task: Parent Task,
-  transformers: [
-    TransformerTrait,
-  ]
-  postTransform: public method,
+# Track each iteration and the context of the Task
+DataInterface = {
+    public function setCurrentExtractedRecord(array);
+    public function getCurrentExtractedRecord(); # return array
+    public function setCurrentIteration(mixed);
+    public function getCurrentIteration(); # return mixed
+    public function setExtracted(array);
+    public function getExtractedCount(); # return integer
+    public function getExtracted(); # return array
+    public function getLoadedCount(); # return integer
+    public function setLoadedCount(integer);
+    public function setTransformed(array);
+    public function getTransformedCount(); # return integer
+    public function getTransformed(); # return array
+    public function mergeTransformed(array);
+    public function unsetTransformedOffset(mixed);
+    public function unsetExtractedOffset(mixed);
+    public function setTask(TaskInterface);
+    public function getTask(); # return TaskInterface
 };
+```
 
-TransformerTrait = {
-  transformation: Parent Transformation,
-  transform: abstract method,
-  postTransform: public method,
-};
+Behavior
+========
+
+```text
+Processor::executeTask
+  => getExtractor
+     => foreach page
+        => getTransformations
+           => foreach transformation
+              => getTransformers
+                 => transform
+                 => bind
+     => getLoader
 ```
 
 Demo

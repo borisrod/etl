@@ -11,6 +11,7 @@
 
 namespace AntiMattr\ETL\Transform;
 
+use AntiMattr\ETL\Task\TaskInterface;
 use AntiMattr\ETL\Exception\TransformationContinueException;
 use AntiMattr\ETL\Exception\TransformException;
 use AntiMattr\ETL\Transform\Transformer\TransformerInterface;
@@ -161,15 +162,15 @@ trait TransformationTrait
     }
 
     /**
-     * @param \AntiMattr\ETL\Task\TaskTrait
+     * @param \AntiMattr\ETL\Task\TaskInterface
      */
-    public function setTask($task)
+    public function setTask(TaskInterface $task)
     {
         $this->task = $task;
     }
 
     /**
-     * @return \AntiMattr\ETL\Task\TaskTrait
+     * @return \AntiMattr\ETL\Task\TaskInterface
      */
     public function getTask()
     {
