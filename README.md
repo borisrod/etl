@@ -3,7 +3,7 @@
 ETL
 ===
 
-AntiMattr ETL is a library for extracting, transforming, and loading data.
+AntiMattr ETL is a library for extracting, transforming, and loading data. Currently supports ETL from MongoDB to MySQL. Other data sources to follow.
 
 Installation
 ============
@@ -25,6 +25,23 @@ composer install
 ```
 
 If everything worked, the ETL can now be found at vendor/antimattr/etl.
+
+Overview
+========
+
+The execution flow of the processor is:
+
+```text
+Processor::executeTask
+  => getExtractor::getPages
+     => foreach page
+        => getTransformations
+           => foreach transformation
+              => getTransformers
+                 => transform
+                 => bind
+        => getLoader::load
+```
 
 Features
 ========
@@ -64,7 +81,7 @@ Features
     From the command line:
 
     ```bash
-    ./demo/console antimattr:etl:execute mongodb_mysql sellables,products
+    ./demo/console antimattr:etl:execute mongodb_mysql sellables,products,suppliers
     ```
 
  * Define your ETL recipe with Dependency Injection (see demo)
@@ -74,7 +91,7 @@ Model
 
 ```javascript
 TaskInterface = {
-    function initialize();
+    function initialize(); # Initialize dependencies from configuration array
     function getData(); # return DataInterface
     function setData(DataInterface);
     function setDefaultTransformationClass(string);
@@ -104,13 +121,13 @@ LoaderInterface = {
 }
 
 TransformationInterface = {
-    public function shouldContinue();
+    public function shouldContinue(); # Interrupts current transformation when TransformationContinueException is thrown
     public function initialize(array);
     public function postTransform();
     public function getDefaultTransformerClass(); # return string
     public function getDefaultValue(); # return mixed
-    public function getField(); # return string
-    public function getName(); # return string
+    public function getField(); # return String identifying property name from data extract
+    public function getName(); # return String identifying property name for data load
     public function setTask(TaskInterface);
     public function getTask(); # return TaskInterface
     public function addTransformer(TransformerInterface);
@@ -123,7 +140,7 @@ TransformerInterface = {
     public function transform(mixed, TransformationInterface); # return mixed
 };
 
-# Track each iteration and the context of the Task
+# Track each iteration, the context of the Task, the extracted data, and the transformed data
 DataInterface = {
     public function setCurrentExtractedRecord(array);
     public function getCurrentExtractedRecord(); # return array
@@ -137,27 +154,12 @@ DataInterface = {
     public function setTransformed(array);
     public function getTransformedCount(); # return integer
     public function getTransformed(); # return array
-    public function mergeTransformed(array);
-    public function unsetTransformedOffset(mixed);
+    public function mergeTransformed(array); # Use this method to override a previously transformed iteration
+    public function unsetTransformedOffset(mixed); # Use this method to remove a previously transformed iteration
     public function unsetExtractedOffset(mixed);
     public function setTask(TaskInterface);
     public function getTask(); # return TaskInterface
 };
-```
-
-Behavior
-========
-
-```text
-Processor::executeTask
-  => getExtractor
-     => foreach page
-        => getTransformations
-           => foreach transformation
-              => getTransformers
-                 => transform
-                 => bind
-     => getLoader
 ```
 
 Demo

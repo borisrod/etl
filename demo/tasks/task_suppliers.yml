@@ -1,0 +1,200 @@
+services:
+  # Extractors
+  antimattr.etl_extractor.suppliers:
+    class: "%antimattr.mongodb_extractor.class%"
+    public: false
+    arguments: [ @antimattr.etl_mongodb_database, 'suppliers' ]
+    calls:
+      - [ 'setPerPage', [ 1500 ] ]
+
+  # Loaders
+  antimattr.etl_loader.suppliers:
+    class: AntiMattr\ETL\Load\MySQL\MySQLReplaceIntoLoader
+    public: false
+    arguments: [ @antimattr.etl_mysql_connection, 'suppliers' ]
+
+  # Tasks
+  antimattr.etl_task.suppliers:
+    class: "%antimattr.etl_task_common.class%"
+    calls:
+      - [ 'setExtractor', [ @antimattr.etl_extractor.suppliers ] ]
+      - [ 'setLoader', [ @antimattr.etl_loader.suppliers ] ]
+    properties:
+      configuration:
+        -
+          field: '_id'
+          name: 'id'
+          transformers:
+            - @antimattr.etl_transformer.mongodb.mongoid
+        -
+          field: 'name'
+          transformers:
+            - @antimattr.etl_transformer.scalar.html_utf8
+            -
+              class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
+              properties:
+                options: { 'maxlength': 255 }
+        - { field: 'status' }
+        -
+          field: 'deletedAt'
+          transformers:
+            - @antimattr.etl_transformer.mongodb.mongodate
+        -
+          field: 'createdAt'
+          transformers:
+            - @antimattr.etl_transformer.mongodb.mongodate
+        -
+          field: 'updatedAt'
+          transformers:
+            - @antimattr.etl_transformer.mongodb.mongodate
+        -
+          field: 'vendornetId'
+          transformers:
+            - @antimattr.etl_transformer.scalar.html_utf8
+            -
+              class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
+              properties:
+                options: { 'maxlength': 50 }
+        -
+          field: 'expeditedShipTimes'
+          transformers:
+            - @antimattr.etl_transformer.mongodb.mongoboolean
+        -
+          field: 'user'
+          name: 'userId'
+          transformers:
+            - @antimattr.etl_transformer.mongodb.mongodbref
+        -
+          field: 'mrch'
+          name: 'merchantId'
+          transformers:
+            - @antimattr.etl_transformer.mongodb.mongodbref
+        -
+          field: 'pm'
+          name: 'paymentModel'
+        -
+          field: 'apat'
+          name: 'approvedAt'
+          transformers:
+            - @antimattr.etl_transformer.mongodb.mongodate
+        -
+          field: 'saat'
+          name: 'submittedForApprovalAt'
+          transformers:
+            - @antimattr.etl_transformer.mongodb.mongodate
+        -
+          field: 'sfar'
+          name: 'submissionForApprovalRejected'
+          transformers:
+            - @antimattr.etl_transformer.mongodb.mongodate
+        -
+          field: 'tpat'
+          name: 'tippedAt'
+          transformers:
+            - @antimattr.etl_transformer.mongodb.mongodate
+        -
+          field: 'freeShipping'
+          transformers:
+            - @antimattr.etl_transformer.mongodb.mongoboolean
+        -
+          field: 'allowFreeShipping'
+          transformers:
+            - @antimattr.etl_transformer.mongodb.mongoboolean
+        -
+          field: 'allowCredits'
+          transformers:
+            - @antimattr.etl_transformer.mongodb.mongoboolean
+        -
+          field: 'prgsp'
+          name: 'storeProfile'
+          transformers:
+            - @antimattr.etl_transformer.mongodb.mongodate
+        -
+          field: 'prgbi'
+          name: 'businessInformation'
+          transformers:
+            - @antimattr.etl_transformer.mongodb.mongodate
+        -
+          field: 'prgfi'
+          name: 'financialInformation'
+          transformers:
+            - @antimattr.etl_transformer.mongodb.mongodate
+        -
+          field: 'prgpa'
+          name: 'productsAdded'
+          transformers:
+            - @antimattr.etl_transformer.mongodb.mongodate
+        -
+          field: 'oneStepJoinFlow'
+          transformers:
+            - @antimattr.etl_transformer.mongodb.mongoboolean
+        -
+          field: 'mrchap'
+          transformers:
+            - @antimattr.etl_transformer.mongodb.mongodate
+        -
+          field: 'heroSellable'
+          transformers:
+            - @antimattr.etl_transformer.scalar.html_utf8
+            -
+              class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
+              properties:
+                options: { 'maxlength': 100 }
+        -
+          field: 'email'
+          transformers:
+            -
+              class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
+              properties:
+                options: { 'maxlength': 255 }
+        -
+          field: 'accountingEmail'
+          transformers:
+            -
+              class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
+              properties:
+                options: { 'maxlength': 255 }
+        -
+          field: 'url'
+          transformers:
+            - @antimattr.etl_transformer.scalar.html_utf8
+            -
+              class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
+              properties:
+                options: { 'maxlength': 200 }
+        -
+          field: 'discountPrograms'
+          name: 'allowBetaDiscount'
+          transformers:
+            -
+              class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoEmbedOneTransformer
+              properties:
+                options: { 'field': 'allowBetaDiscounts' }
+            - @antimattr.etl_transformer.mongodb.mongoboolean
+        -
+          field: 'discountPrograms'
+          name: 'allowLoveDiscount'
+          transformers:
+            -
+              class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoEmbedOneTransformer
+              properties:
+                options: { 'field': 'allowLoveDiscount' }
+            - @antimattr.etl_transformer.mongodb.mongoboolean
+        -
+          field: 'discountPrograms'
+          name: 'allowLoyaltyDiscount'
+          transformers:
+            -
+              class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoEmbedOneTransformer
+              properties:
+                options: { 'field': 'allowLoyaltyDiscount' }
+            - @antimattr.etl_transformer.mongodb.mongoboolean
+        -
+          field: 'discountPrograms'
+          name: 'allowNewFollowerDiscount'
+          transformers:
+            -
+              class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoEmbedOneTransformer
+              properties:
+                options: { 'field': 'allowNewFollowerDiscount' }
+            - @antimattr.etl_transformer.mongodb.mongoboolean

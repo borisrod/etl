@@ -126,25 +126,25 @@ class Processor
                 foreach ($transformations as $transformation) {
                     try {
                         $transformation->shouldContinue();
-                    } catch (TransformationContinueException $e) {
-                        continue;
-                    }
-                    $field = $transformation->getField();
-                    $value = $extractedRecord[$field];
+                        $field = $transformation->getField();
+                        $value = $extractedRecord[$field];
 
-                    $transformers = $transformation->getTransformers();
-                    foreach ($transformers as $transformer) {
+                        $transformers = $transformation->getTransformers();
+                        foreach ($transformers as $transformer) {
+                            try {
+                                $value = $transformer->transform($value, $transformation);
+                                $transformer->bind($value, $transformation);
+                            } catch (TransformException $e) {
+                                $this->logError(sprintf("%s.%s %s %s", $this->alias, $taskName, 'TransformException', $e->getMessage()));
+                            }
+                        }
                         try {
-                            $value = $transformer->transform($value, $transformation);
-                            $transformer->bind($value, $transformation);
+                            $transformation->postTransform();
                         } catch (TransformException $e) {
                             $this->logError(sprintf("%s.%s %s %s", $this->alias, $taskName, 'TransformException', $e->getMessage()));
                         }
-                    }
-                    try {
-                        $transformation->postTransform();
-                    } catch (TransformException $e) {
-                        $this->logError(sprintf("%s.%s %s %s", $this->alias, $taskName, 'TransformException', $e->getMessage()));
+                    } catch (TransformationContinueException $e) {
+                        continue;
                     }
                 }
                 $data->unsetExtractedOffset($iteration);

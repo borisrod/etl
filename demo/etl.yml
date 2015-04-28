@@ -41,15 +41,6 @@ services:
       - "%antimattr.etl_mysql_connection.username%"
       - "%antimattr.etl_mysql_connection.password%"
 
-  # Register task collection
-  antimattr.etl_tasks:
-    class: Doctrine\Common\Collections\ArrayCollection
-    public: false
-    arguments:
-      -
-        products: @antimattr.etl_task.products
-        sellables: @antimattr.etl_task.sellables
-
   # Processors
   mongodb_mysql:
     class: "%antimattr.etl_processor.class%"

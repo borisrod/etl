@@ -1,3 +1,14 @@
 imports:
   - { resource: "tasks/task_products.yml" }
   - { resource: "tasks/task_sellables.yml" }
+  - { resource: "tasks/task_suppliers.yml" }
+
+services:
+  # Register task collection
+  antimattr.etl_tasks:
+    class: Doctrine\Common\Collections\ArrayCollection
+    arguments:
+      -
+        products: @antimattr.etl_task.products
+        sellables: @antimattr.etl_task.sellables
+        suppliers: @antimattr.etl_task.suppliers
