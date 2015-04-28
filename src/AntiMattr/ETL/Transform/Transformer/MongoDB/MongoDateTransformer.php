@@ -32,6 +32,10 @@ class MongoDateTransformer implements TransformerInterface
      */
     public function transform($value, TransformationInterface $transformation)
     {
+        if (!isset($value)) {
+            return isset($this->options['default']) ? $this->options['default'] : null;
+        }
+
         $date = new \DateTime();
         $date->setTimestamp($value->sec);
 
