@@ -1,6 +1,7 @@
 imports:
   - { resource: "tasks/task_products.yml" }
   - { resource: "tasks/task_sellables.yml" }
+  - { resource: "tasks/task_sellers.yml" }
   - { resource: "tasks/task_suppliers.yml" }
 
 services:
@@ -12,3 +13,4 @@ services:
         products: @antimattr.etl_task.products
         sellables: @antimattr.etl_task.sellables
         suppliers: @antimattr.etl_task.suppliers
+        sellers: @antimattr.etl_task.sellers
