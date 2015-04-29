@@ -29,6 +29,14 @@ trait ExtractorTrait
     protected $task;
 
     /**
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getPages()
+    {
+        return $this->pages;
+    }
+
+    /**
      * @param integer $perPage
      */
     public function setPerPage($perPage)
@@ -50,5 +58,15 @@ trait ExtractorTrait
     public function getTask()
     {
         return $this->task;
+    }
+
+    /**
+     * @param array $results
+     *
+     * @return \Doctrine\Common\Collections\ArrayCollection
+     */
+    protected function createArrayCollection(array $data = [])
+    {
+        return new ArrayCollection($data);
     }
 }

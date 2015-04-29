@@ -81,7 +81,7 @@ Features
     From the command line:
 
     ```bash
-    ./demo/console antimattr:etl:execute mongodb_mysql sellables,products,suppliers
+    ./demo/console antimattr:etl:execute mongodb_mysql --task=sellables --task=products --task=suppliers
     ```
 
  * Define your ETL recipe with Dependency Injection (see demo)

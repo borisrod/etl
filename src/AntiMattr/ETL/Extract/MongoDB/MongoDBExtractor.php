@@ -9,9 +9,10 @@
  * file that was distributed with this source code.
  */
 
-namespace AntiMattr\ETL\Extract;
+namespace AntiMattr\ETL\Extract\MongoDB;
 
-use Doctrine\Common\Collections\ArrayCollection;
+use AntiMattr\ETL\Extract\ExtractorInterface;
+use AntiMattr\ETL\Extract\ExtractorTrait;
 
 /**
  * @author Matthew Fitzgerald <matthewfitz@gmail.com>
@@ -23,7 +24,7 @@ class MongoDBExtractor implements ExtractorInterface
     /** @var string */
     protected $collection;
 
-    /** @var MongoDB */
+    /** @var \MongoDB */
     protected $db;
 
     /** @var array */
@@ -37,23 +38,28 @@ class MongoDBExtractor implements ExtractorInterface
         $this->collection = $collection;
         $this->db = $db;
         $this->query = $query;
-        $this->pages = new ArrayCollection();
         $this->projection = $projection;
     }
 
-    /**
-     * @return \Doctrine\Common\Collections\Collection
-     */
     public function getPages()
     {
-        $results = iterator_to_array($this->db->{$this->collection}->find($this->query, $this->projection));
-
-        if (!isset($this->perPage)) {
-            $this->pages->add($results);
-        } else {
-            $this->pages = new ArrayCollection(array_chunk($results, $this->perPage, true));
-        }
+        $cursor = $this->db->{$this->collection}->find($this->query, $this->projection);
+        $this->buildPagesFromCursor($cursor);
 
         return $this->pages;
+    }
+
+    /**
+     * @param \MongoCursor $cursor
+     */
+    protected function buildPagesFromCursor(\MongoCursor $cursor)
+    {
+        $results = iterator_to_array($cursor);
+
+        if (!isset($this->perPage)) {
+            $this->pages = $this->createArrayCollection($results);
+        } else {
+            $this->pages = $this->createArrayCollection(array_chunk($results, $this->perPage, true));
+        }
     }
 }

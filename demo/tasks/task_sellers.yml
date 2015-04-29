@@ -1,11 +1,19 @@
 services:
   # Extractors
-  antimattr.etl_extractor.sellers:
-    class: "%antimattr.mongodb_extractor.class%"
+  antimattr.etl_extractor.sellers_max_updated_at:
+    class: AntiMattr\ETL\Extract\MongoDB\PDOMaximumDateColumnExtractor
     public: false
-    arguments: [ @antimattr.etl_mongodb_database, 'sellers' ]
+    arguments:
+      - @antimattr.etl_mongodb_database
+      - 'sellers'
+      - 'updatedAt'
+      - @antimattr.etl_mysql_connection
+      - 'sellers'
+      - 'updatedAt'
+      - '2000-01-01 EST'
     calls:
-      - [ 'setPerPage', [ 1500 ] ]
+      - [ 'setPerPage', [ 500 ] ]
+      - [ 'setTimezone', [ 'EST' ] ]
 
   # Loaders
   antimattr.etl_loader.sellers:
@@ -17,7 +25,7 @@ services:
   antimattr.etl_task.sellers:
     class: "%antimattr.etl_task_common.class%"
     calls:
-      - [ 'setExtractor', [ @antimattr.etl_extractor.sellers ] ]
+      - [ 'setExtractor', [ @antimattr.etl_extractor.sellers_max_updated_at ] ]
       - [ 'setLoader', [ @antimattr.etl_loader.sellers ] ]
     properties:
       configuration:

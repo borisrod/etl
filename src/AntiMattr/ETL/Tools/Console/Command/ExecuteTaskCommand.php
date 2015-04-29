@@ -11,7 +11,7 @@
 
 namespace AntiMattr\ETL\Tools\Console\Command;
 
-use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -40,9 +40,11 @@ class ExecuteTaskCommand extends AbstractETLCommand
     {
         parent::configure();
         $this
-            ->addArgument(
-                'tasks',
-                InputArgument::REQUIRED
+            ->addOption(
+                'task',
+                null,
+                InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY,
+                'Identify which tasks to run'
             )
         ;
     }
@@ -56,8 +58,7 @@ class ExecuteTaskCommand extends AbstractETLCommand
         $processor = $input->getArgument('processor');
         $this->processor = $this->container->get($processor);
 
-        $tasks = explode(',', $input->getArgument('tasks'));
-
+        $tasks = $input->getOption('task');
         foreach ($tasks as $task) {
             $this->processor->executeTask($task);
         }

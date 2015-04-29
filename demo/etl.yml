@@ -4,7 +4,6 @@ imports:
   - { resource: "tasks.yml" }
 
 parameters:
-  antimattr.mongodb_extractor.class: AntiMattr\ETL\Extract\MongoDBExtractor
   antimattr.etl_processor_factory.class: AntiMattr\ETL\ProcessorFactory
   antimattr.etl_processor.class: AntiMattr\ETL\Processor
   antimattr.etl_task_common.class: AntiMattr\ETL\Task\CommonTask
