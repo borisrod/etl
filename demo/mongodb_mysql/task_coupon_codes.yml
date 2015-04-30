@@ -58,6 +58,7 @@ services:
         - { field: 'maxUses' }
         - { field: 'numUses' }
         -
-          field: 'createdAt'
+          field: '_id'
+          name: 'createdAt'
           transformers:
             - @antimattr.etl_transformer.mongodb.mongoid_date
