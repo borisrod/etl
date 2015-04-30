@@ -1,0 +1,64 @@
+services:
+  # Extractors
+  antimattr.etl_extractor.categories_max_updated_at:
+    class: AntiMattr\ETL\Extract\MongoDB\PDOMaximumDateColumnExtractor
+    public: false
+    arguments:
+      - @antimattr.etl_mongodb_database
+      - 'seller_categories'
+      - 'updatedAt'
+      - @antimattr.etl_mysql_connection
+      - 'categories'
+      - 'updatedAt'
+      - '2000-01-01 EST'
+    calls:
+      - [ 'setPerPage', [ 500 ] ]
+      - [ 'setTimezone', [ 'EST' ] ]
+
+  # Loaders
+  antimattr.etl_loader.categories:
+    class: AntiMattr\ETL\Load\MySQL\MySQLReplaceIntoLoader
+    public: false
+    arguments: [ @antimattr.etl_mysql_connection, 'categories' ]
+
+  # Tasks
+  antimattr.etl_task.categories:
+    class: "%antimattr.etl_task_common.class%"
+    calls:
+      - [ 'setExtractor', [ @antimattr.etl_extractor.categories_max_updated_at ] ]
+      - [ 'setLoader', [ @antimattr.etl_loader.categories ] ]
+    properties:
+      configuration:
+        -
+          field: '_id'
+          name: 'id'
+          transformers:
+            - @antimattr.etl_transformer.mongodb.mongoid
+        -
+          field: 'name'
+          transformers:
+            - @antimattr.etl_transformer.scalar.html_utf8
+            -
+              class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
+              properties:
+                options: { 'maxlength': 255 }
+        -
+          field: 'shortName'
+          transformers:
+            - @antimattr.etl_transformer.scalar.html_utf8
+            -
+              class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
+              properties:
+                options: { 'maxlength': 20 }
+        -
+          field: 'slug'
+          transformers:
+            - @antimattr.etl_transformer.scalar.html_utf8
+            -
+              class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
+              properties:
+                options: { 'maxlength': 20 }
+        -
+          field: 'updatedAt'
+          transformers:
+            - @antimattr.etl_transformer.mongodb.mongodate

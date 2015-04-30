@@ -1,0 +1,41 @@
+services:
+  # Extractors
+  antimattr.etl_extractor.admin_users_max_id:
+    class: AntiMattr\ETL\Extract\MongoDB\PDOMaximumObjectIdColumnExtractor
+    public: false
+    arguments:
+      - @antimattr.etl_mongodb_database
+      - 'AdminUser'
+      - '_id'
+      - @antimattr.etl_mysql_connection
+      - 'admin_users'
+      - 'id'
+    calls:
+      - [ 'setPerPage', [ 500 ] ]
+
+  # Loaders
+  antimattr.etl_loader.admin_users:
+    class: AntiMattr\ETL\Load\MySQL\MySQLReplaceIntoLoader
+    public: false
+    arguments: [ @antimattr.etl_mysql_connection, 'admin_users' ]
+
+  # Tasks
+  antimattr.etl_task.admin_users:
+    class: "%antimattr.etl_task_common.class%"
+    calls:
+      - [ 'setExtractor', [ @antimattr.etl_extractor.admin_users_max_id ] ]
+      - [ 'setLoader', [ @antimattr.etl_loader.admin_users ] ]
+    properties:
+      configuration:
+        -
+          field: '_id'
+          name: 'id'
+          transformers:
+            - @antimattr.etl_transformer.mongodb.mongoid
+        -
+          field: 'ldapUsername'
+          transformers:
+            -
+              class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
+              properties:
+                options: { 'maxlength': 30 }

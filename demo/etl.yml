@@ -1,7 +1,7 @@
 imports:
   - { resource: "logger.yml" }
   - { resource: "transformers.yml" }
-  - { resource: "tasks.yml" }
+  - { resource: "mongodb_mysql/tasks.yml" }
 
 parameters:
   antimattr.etl_processor_factory.class: AntiMattr\ETL\ProcessorFactory
@@ -44,6 +44,6 @@ services:
   mongodb_mysql:
     class: "%antimattr.etl_processor.class%"
     factory: [ "%antimattr.etl_processor_factory.class%", 'getProcessor' ]
-    arguments: [ 'mongodb_mysql', @logger ]
+    arguments: [ 'mongodb_mysql', @logger_mongodb_mysql ]
     calls:
-      - [ 'setTasks', [ @antimattr.etl_tasks ] ]
+      - [ 'setTasks', [ @antimattr.etl_tasks.mongodb_mysql ] ]

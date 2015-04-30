@@ -4,6 +4,10 @@ services:
     class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoDateTransformer
     properties:
       options: { 'format': 'Y-m-d H:i:s', 'timezone': 'EST' }
+  antimattr.etl_transformer.mongodb.mongoid_date:
+    class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoIdToDateTransformer
+    properties:
+      options: { 'format': 'Y-m-d H:i:s', 'timezone': 'EST' }
   antimattr.etl_transformer.mongodb.mongoboolean:
     class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoBooleanTransformer
     properties:

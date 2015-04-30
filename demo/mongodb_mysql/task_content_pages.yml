@@ -1,0 +1,60 @@
+services:
+  # Extractors
+  antimattr.etl_extractor.content_pages_max_updated_at:
+    class: AntiMattr\ETL\Extract\MongoDB\PDOMaximumDateColumnExtractor
+    public: false
+    arguments:
+      - @antimattr.etl_mongodb_database
+      - 'content_pages'
+      - 'updatedAt'
+      - @antimattr.etl_mysql_connection
+      - 'content_pages'
+      - 'updatedAt'
+      - '2000-01-01 EST'
+    calls:
+      - [ 'setPerPage', [ 500 ] ]
+      - [ 'setTimezone', [ 'EST' ] ]
+
+  # Loaders
+  antimattr.etl_loader.content_pages:
+    class: AntiMattr\ETL\Load\MySQL\MySQLReplaceIntoLoader
+    public: false
+    arguments: [ @antimattr.etl_mysql_connection, 'content_pages' ]
+
+  # Tasks
+  antimattr.etl_task.content_pages:
+    class: "%antimattr.etl_task_common.class%"
+    calls:
+      - [ 'setExtractor', [ @antimattr.etl_extractor.content_pages_max_updated_at ] ]
+      - [ 'setLoader', [ @antimattr.etl_loader.content_pages ] ]
+    properties:
+      configuration:
+        -
+          field: '_id'
+          name: 'id'
+          transformers:
+            - @antimattr.etl_transformer.mongodb.mongoid
+        -
+          field: 'slug'
+          transformers:
+            - @antimattr.etl_transformer.scalar.html_utf8
+            -
+              class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
+              properties:
+                options: { 'maxlength': 255 }
+        -
+          field: 'createdAt'
+          transformers:
+            - @antimattr.etl_transformer.mongodb.mongodate
+        -
+          field: 'startDate'
+          transformers:
+            - @antimattr.etl_transformer.mongodb.mongodate
+        -
+          field: 'endDate'
+          transformers:
+            - @antimattr.etl_transformer.mongodb.mongodate
+        -
+          field: 'updatedAt'
+          transformers:
+            - @antimattr.etl_transformer.mongodb.mongodate

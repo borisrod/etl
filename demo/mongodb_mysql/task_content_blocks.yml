@@ -1,0 +1,77 @@
+services:
+  # Extractors
+  antimattr.etl_extractor.content_blocks_max_updated_at:
+    class: AntiMattr\ETL\Extract\MongoDB\PDOMaximumDateColumnExtractor
+    public: false
+    arguments:
+      - @antimattr.etl_mongodb_database
+      - 'blocks'
+      - 'updatedAt'
+      - @antimattr.etl_mysql_connection
+      - 'content_blocks'
+      - 'updatedAt'
+      - '2000-01-01 EST'
+    calls:
+      - [ 'setPerPage', [ 500 ] ]
+      - [ 'setTimezone', [ 'EST' ] ]
+
+  # Loaders
+  antimattr.etl_loader.content_blocks:
+    class: AntiMattr\ETL\Load\MySQL\MySQLReplaceIntoLoader
+    public: false
+    arguments: [ @antimattr.etl_mysql_connection, 'content_blocks' ]
+
+  # Tasks
+  antimattr.etl_task.content_blocks:
+    class: "%antimattr.etl_task_common.class%"
+    calls:
+      - [ 'setExtractor', [ @antimattr.etl_extractor.content_blocks_max_updated_at ] ]
+      - [ 'setLoader', [ @antimattr.etl_loader.content_blocks ] ]
+    properties:
+      configuration:
+        -
+          field: '_id'
+          name: 'id'
+          transformers:
+            - @antimattr.etl_transformer.mongodb.mongoid
+        -
+          field: 'key'
+          name: 'slug'
+          transformers:
+            - @antimattr.etl_transformer.scalar.html_utf8
+            -
+              class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
+              properties:
+                options: { 'maxlength': 255 }
+        -
+          field: 'createdAt'
+          transformers:
+            - @antimattr.etl_transformer.mongodb.mongodate
+        -
+          field: 'goLiveDateTime'
+          transformers:
+            - @antimattr.etl_transformer.mongodb.mongodate
+        -
+          field: 'endDateTime'
+          transformers:
+            - @antimattr.etl_transformer.mongodb.mongodate
+        -
+          field: 'updatedAt'
+          transformers:
+            - @antimattr.etl_transformer.mongodb.mongodate
+        -
+          field: 'content'
+          transformers:
+            - @antimattr.etl_transformer.scalar.html_utf8
+            -
+              class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
+              properties:
+                options: { 'maxlength': 1000 }
+        -
+          field: 'title'
+          transformers:
+            - @antimattr.etl_transformer.scalar.html_utf8
+            -
+              class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
+              properties:
+                options: { 'maxlength': 255 }

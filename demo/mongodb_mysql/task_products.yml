@@ -1,0 +1,116 @@
+services:
+  # Extractors
+  antimattr.etl_extractor.products_max_updated_at:
+    class: AntiMattr\ETL\Extract\MongoDB\PDOMaximumDateColumnExtractor
+    public: false
+    arguments:
+      - @antimattr.etl_mongodb_database
+      - 'products'
+      - 'updatedAt'
+      - @antimattr.etl_mysql_connection
+      - 'products'
+      - 'updatedAt'
+      - '2000-01-01 EST'
+    calls:
+      - [ 'setPerPage', [ 500 ] ]
+      - [ 'setTimezone', [ 'EST' ] ]
+
+  # Loaders
+  antimattr.etl_loader.products:
+    class: AntiMattr\ETL\Load\MySQL\MySQLReplaceIntoLoader
+    public: false
+    arguments: [ @antimattr.etl_mysql_connection, 'products' ]
+
+  # Tasks
+  antimattr.etl_task.products:
+    class: "%antimattr.etl_task_common.class%"
+    calls:
+      - [ 'setExtractor', [ @antimattr.etl_extractor.products_max_updated_at ] ]
+      - [ 'setLoader', [ @antimattr.etl_loader.products ] ]
+    properties:
+      configuration:
+        -
+          field: '_id'
+          name: 'id'
+          transformers:
+            - @antimattr.etl_transformer.mongodb.mongoid
+        - { field: 'status' }
+        -
+          field: 'deletedAt'
+          transformers:
+            - @antimattr.etl_transformer.mongodb.mongodate
+        -
+          field: 'createdAt'
+          transformers:
+            - @antimattr.etl_transformer.mongodb.mongodate
+        -
+          field: 'updatedAt'
+          transformers:
+            - @antimattr.etl_transformer.mongodb.mongodate
+        -
+          field: 'name'
+          transformers:
+            - @antimattr.etl_transformer.scalar.html_utf8
+            -
+              class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
+              properties:
+                options: { 'maxlength': 255 }
+        -
+          field: 'supplier'
+          name: 'supplierId'
+          transformers:
+            - @antimattr.etl_transformer.mongodb.mongodbref
+        -
+          field: 'suggestedCategory'
+          name: 'suggestedCategoryId'
+          transformers:
+            - @antimattr.etl_transformer.mongodb.mongodbref
+        - { field: 'msrp' }
+        - { field: 'price' }
+        -
+          field: 'originator'
+          name: 'originatorId'
+          transformers:
+            - @antimattr.etl_transformer.mongodb.mongodbref
+        - { field: 'weight' }
+        -
+          field: 'description'
+          transformers:
+            - @antimattr.etl_transformer.scalar.html_utf8
+            -
+              class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
+              properties:
+                options: { 'maxlength': 500 }
+        -
+          field: 'taxon'
+          name: 'taxonomyId'
+          transformers:
+            - @antimattr.etl_transformer.mongodb.mongodbref
+        - { field: 'private' }
+        -
+          field: 'exclusive'
+          transformers:
+            - @antimattr.etl_transformer.mongodb.mongoboolean
+        - { field: 'height' }
+        - { field: 'width' }
+        - { field: 'length' }
+        -
+          field: 'upc'
+          transformers:
+            - @antimattr.etl_transformer.scalar.html_utf8
+            -
+              class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
+              properties:
+                options: { 'maxlength': 12 }
+        -
+          field: 'mpn'
+          transformers:
+            - @antimattr.etl_transformer.scalar.html_utf8
+            -
+              class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
+              properties:
+                options: { 'maxlength': 10 }
+        -
+          field: 'customizable'
+          transformers:
+            - @antimattr.etl_transformer.mongodb.mongoboolean

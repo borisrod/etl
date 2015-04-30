@@ -1,10 +1,10 @@
 services:
   # Monolog
-  stream_handler:
+  stream_handler_mongodb_mysql:
     class: Monolog\Handler\StreamHandler
     arguments: [ "%antimattr.etl_log.path%", "%antimattr.etl_log.level%" ]
-  logger:
+  logger_mongodb_mysql:
     class: Monolog\Logger
-    arguments: [ 'logger' ]
+    arguments: [ 'mongodb_mysql' ]
     calls:
-      - [ 'pushHandler', [ @stream_handler ] ]
+      - [ 'pushHandler', [ @stream_handler_mongodb_mysql ] ]
