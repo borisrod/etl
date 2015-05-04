@@ -1,0 +1,82 @@
+services:
+  # Extractors
+  antimattr.etl_extractor.product_attributes_max_updated_at:
+    class: AntiMattr\ETL\Extract\MongoDB\PDOMaximumColumnEmbedManyDateExtractor
+    public: false
+    arguments:
+      - @antimattr.etl_mongodb_database
+      - 'products'
+      - 'updatedAt'
+      - @antimattr.etl_mysql_connection
+      - 'products'
+      - 'updatedAt'
+      - '2000-01-01 EST'
+      - { 'attributeValues': 1 }
+    calls:
+      - [ 'setPerPage', [ 500 ] ]
+      - [ 'setBatchField', [ 'attributeValues._id' ] ]
+      - [ 'setEmbedManyField', [ 'attributeValues' ] ]
+      - [ 'setTimezone', [ 'EST' ] ]
+
+  # Loaders
+  antimattr.etl_loader.product_attributes:
+    class: AntiMattr\ETL\Load\MySQL\MySQLDeleteByColumnInsertIntoLoader
+    public: false
+    arguments: [ @antimattr.etl_mysql_connection, 'product_attributes', 'productId' ]
+
+  # Tasks
+  antimattr.etl_task.product_attributes:
+    class: "%antimattr.etl_task_common.class%"
+    calls:
+      - [ 'setExtractor', [ @antimattr.etl_extractor.product_attributes_max_updated_at ] ]
+      - [ 'setLoader', [ @antimattr.etl_loader.product_attributes ] ]
+    properties:
+      configuration:
+        -
+          field: 'attributeValues'
+          name: 'productId'
+          transformers:
+            -
+              class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoEmbedOneTransformer
+              properties:
+                options: { 'field': '_id' }
+            - @antimattr.etl_transformer.mongodb.mongoid
+        -
+          field: 'attributeValues'
+          name: 'code'
+          transformers:
+            -
+              class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoEmbedOneTransformer
+              properties:
+                options: { 'field': 'code' }
+            - @antimattr.etl_transformer.scalar.html_utf8
+            -
+              class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
+              properties:
+                options: { 'maxlength': 255 }
+        -
+          field: 'attributeValues'
+          name: 'type'
+          transformers:
+            -
+              class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoEmbedOneTransformer
+              properties:
+                options: { 'field': 'type' }
+            - @antimattr.etl_transformer.scalar.html_utf8
+            -
+              class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
+              properties:
+                options: { 'maxlength': 255 }
+        -
+          field: 'attributeValues'
+          name: 'value'
+          transformers:
+            -
+              class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoEmbedOneTransformer
+              properties:
+                options: { 'field': 'value' }
+            - @antimattr.etl_transformer.scalar.html_utf8
+            -
+              class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
+              properties:
+                options: { 'maxlength': 255 }

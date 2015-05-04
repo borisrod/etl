@@ -1,7 +1,7 @@
 services:
   # Extractors
   antimattr.etl_extractor.products_max_updated_at:
-    class: AntiMattr\ETL\Extract\MongoDB\PDOMaximumDateColumnExtractor
+    class: AntiMattr\ETL\Extract\MongoDB\PDOMaximumColumnDateExtractor
     public: false
     arguments:
       - @antimattr.etl_mongodb_database

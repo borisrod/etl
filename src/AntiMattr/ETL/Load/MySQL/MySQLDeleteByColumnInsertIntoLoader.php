@@ -1,0 +1,127 @@
+<?php
+
+/*
+ * This file is part of the AntiMattr ETL, a library by Matthew Fitzgerald.
+ *
+ * (c) 2014 Matthew Fitzgerald
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace AntiMattr\ETL\Load\MySQL;
+
+use AntiMattr\ETL\Exception\LoadException;
+
+/**
+ * @author Matthew Fitzgerald <matthewfitz@gmail.com>
+ */
+class MySQLDeleteByColumnInsertIntoLoader extends MySQLReplaceIntoLoader
+{
+    /** @var string */
+    protected $column;
+
+    public function __construct(\PDO $connection, $table, $column)
+    {
+        $this->connection = $connection;
+        $this->table = $table;
+        $this->column = $column;
+    }
+
+    /**
+     * @throws \AntiMattr\ETL\Exception\LoadException
+     */
+    public function load()
+    {
+        $data = $this->task->getData();
+        $transformed = $data->getTransformed();
+
+        if (empty($transformed)) {
+            throw new LoadException("Error - No data to load");
+        }
+
+        $firstRow = array_slice($transformed, 0, 1);
+        $first = array_shift($firstRow);
+        $properties = array_keys($first);
+        $columns = implode(', ', $properties);
+
+        $valuePlaceholders = [];
+        $values = [];
+        $foreignKeys = [];
+        foreach ($transformed as $row) {
+            if (!isset($row[$this->column])) {
+                continue;
+            }
+
+            $foreignKeys[] = $row[$this->column];
+
+            $result = [];
+            $count = sizeof($row);
+            if ($count > 0) {
+                $values = array_merge($values, array_values($row));
+                for($x = 0; $x < $count; $x++){
+                    $result[] = '?';
+                }
+            }
+
+            $valuePlaceholders[] = '(' . implode(',', $result) . ')';
+        }
+
+        $deleteSql = sprintf(
+            "DELETE FROM %s WHERE %s IN(%s);",
+            $this->table,
+            $this->column,
+            implode(',', array_map(function($id){
+                return sprintf("'%s'", $id);
+            }, $foreignKeys))
+        );
+
+        $insertSql = sprintf(
+            "INSERT INTO %s (%s) VALUES %s;",
+            $this->table,
+            $columns,
+            implode(',', $valuePlaceholders)
+        );
+
+        $loadedCount = 0;
+
+        $this->connection->beginTransaction();
+        try {
+            $delete = $this->connection->prepare($deleteSql);
+            $delete->execute();
+            $this->connection->commit();
+            $loadedCount += $delete->rowCount();
+        } catch (PDOException $e){
+            try {
+                $this->connection->rollBack();
+            } catch (Exception $rollback) {
+
+            }
+
+            throw new LoadException($e->getMessage());
+        }
+
+        $this->connection->beginTransaction();
+        try {
+            $insert = $this->connection->prepare($insertSql);
+            $insert->execute($values);
+            $this->connection->commit();
+            $loadedCount += $insert->rowCount();
+        } catch (PDOException $e){
+            try {
+                $this->connection->rollBack();
+            } catch (Exception $rollback) {
+
+            }
+
+            throw new LoadException($e->getMessage());
+        }
+
+        $data->setLoadedCount($loadedCount);
+    }
+
+    public function postLoad()
+    {
+        return;
+    }
+}

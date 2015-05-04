@@ -6,6 +6,7 @@ imports:
   - { resource: "task_coupon_codes.yml" }
   - { resource: "task_merchants.yml" }
   - { resource: "task_products.yml" }
+  - { resource: "task_product_attributes.yml" }
   - { resource: "task_sellables.yml" }
   - { resource: "task_sellers.yml" }
   - { resource: "task_suppliers.yml" }
@@ -23,6 +24,7 @@ services:
         coupon_codes: @antimattr.etl_task.coupon_codes
         merchants: @antimattr.etl_task.merchants
         products: @antimattr.etl_task.products
+        product_attributes: @antimattr.etl_task.product_attributes
         sellables: @antimattr.etl_task.sellables
-        suppliers: @antimattr.etl_task.suppliers
         sellers: @antimattr.etl_task.sellers
+        suppliers: @antimattr.etl_task.suppliers
