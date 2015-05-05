@@ -1,40 +1,40 @@
 services:
   # Extractors
-  antimattr.etl_extractor.product_attributes_max_updated_at:
+  antimattr.etl_extractor.sellable_flashes_max_updated_at:
     class: AntiMattr\ETL\Extract\MongoDB\PDOMaximumColumnEmbedManyDateExtractor
     public: false
     arguments:
       - @antimattr.etl_mongodb_database
-      - 'products'
+      - 'sellables'
       - 'updatedAt'
       - @antimattr.etl_mysql_connection
-      - 'product_attributes'
+      - 'sellables_flashes'
       - 'updatedAt'
       - '2000-01-01 EST'
       - { 'attributeValues': 1 }
     calls:
       - [ 'setPerPage', [ 500 ] ]
-      - [ 'setBatchField', [ 'attributeValues._id' ] ]
-      - [ 'setEmbedManyField', [ 'attributeValues' ] ]
+      - [ 'setBatchField', [ '_id' ] ]
+      - [ 'setEmbedManyField', [ 'flashes' ] ]
       - [ 'setTimezone', [ 'EST' ] ]
 
   # Loaders
-  antimattr.etl_loader.product_attributes:
+  antimattr.etl_loader.sellable_flashes:
     class: AntiMattr\ETL\Load\MySQL\MySQLDeleteByColumnInsertIntoLoader
     public: false
-    arguments: [ @antimattr.etl_mysql_connection, 'product_attributes', 'productId' ]
+    arguments: [ @antimattr.etl_mysql_connection, 'sellables_flashes', 'sellableId' ]
 
   # Tasks
-  antimattr.etl_task.product_attributes:
+  antimattr.etl_task.sellable_flashes:
     class: "%antimattr.etl_task_common.class%"
     calls:
-      - [ 'setExtractor', [ @antimattr.etl_extractor.product_attributes_max_updated_at ] ]
-      - [ 'setLoader', [ @antimattr.etl_loader.product_attributes ] ]
+      - [ 'setExtractor', [ @antimattr.etl_extractor.sellable_flashes_max_updated_at ] ]
+      - [ 'setLoader', [ @antimattr.etl_loader.sellable_flashes ] ]
     properties:
       configuration:
         -
-          field: 'attributeValues'
-          name: 'productId'
+          field: 'flashes'
+          name: 'id'
           transformers:
             -
               class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoEmbedOneTransformer
@@ -42,44 +42,51 @@ services:
                 options: { 'field': '_id' }
             - @antimattr.etl_transformer.mongodb.mongoid
         -
-          field: 'attributeValues'
-          name: 'code'
+          field: '_id'
+          name: 'sellableId'
           transformers:
-            -
-              class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoEmbedOneTransformer
-              properties:
-                options: { 'field': 'code' }
-            - @antimattr.etl_transformer.scalar.html_utf8
-            -
-              class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
-              properties:
-                options: { 'maxlength': 255 }
+            - @antimattr.etl_transformer.mongodb.mongoid
         -
-          field: 'attributeValues'
-          name: 'type'
+          field: 'flashes'
+          name: 'startDate'
           transformers:
             -
               class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoEmbedOneTransformer
               properties:
-                options: { 'field': 'type' }
-            - @antimattr.etl_transformer.scalar.html_utf8
-            -
-              class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
-              properties:
-                options: { 'maxlength': 255 }
+                options: { 'field': 'startDate' }
+            - @antimattr.etl_transformer.mongodb.mongodate
         -
-          field: 'attributeValues'
-          name: 'value'
+          field: 'flashes'
+          name: 'endDate'
           transformers:
             -
               class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoEmbedOneTransformer
               properties:
-                options: { 'field': 'value' }
+                options: { 'field': 'endDate' }
+            - @antimattr.etl_transformer.mongodb.mongodate
+        - { field: 'estimatedItems' }
+        -
+          field: 'freeShipping'
+          name: 'freeshipping'
+          transformers:
             - @antimattr.etl_transformer.scalar.html_utf8
             -
               class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
               properties:
-                options: { 'maxlength': 255 }
+                options: { 'maxlength': 10 }
+        -
+          field: 'freeShipping'
+          transformers:
+            - @antimattr.etl_transformer.scalar.html_utf8
+            -
+              class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
+              properties:
+                options: { 'maxlength': 10 }
+        - { field: 'discount' }
+        -
+          field: 'allowCredits'
+          transformers:
+            - @antimattr.etl_transformer.mongodb.mongoboolean
         -
           field: '_id'
           name: 'updatedAt'

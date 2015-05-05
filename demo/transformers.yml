@@ -16,6 +16,10 @@ services:
     class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoIdTransformer
   antimattr.etl_transformer.mongodb.mongodbref:
     class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoDBRefTransformer
+  antimattr.etl_transformer.notnull.notnull_date:
+    class: AntiMattr\ETL\Transform\Transformer\NotNull\NotNulToDateTransformer
+    properties:
+      options: { 'format': 'Y-m-d H:i:s', 'timezone': 'EST' }
   antimattr.etl_transformer.scalar.html_utf8:
     class: AntiMattr\ETL\Transform\Transformer\Scalar\HTMLToUTF8Transformer
   antimattr.etl_transformer.scalar.maxlength:

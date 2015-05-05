@@ -27,6 +27,9 @@ trait DataTrait
     /** @var integer */
     protected $currentIteration;
 
+    /** @var \DateTime */
+    protected $endedAt;
+
     /** @var integer */
     protected $extractedCount;
 
@@ -35,6 +38,9 @@ trait DataTrait
 
     /** @var integer */
     protected $loadedCount;
+
+    /** @var \DateTime */
+    protected $startedAt;
 
     /** @var array */
     protected $transformed = [];
@@ -91,6 +97,22 @@ trait DataTrait
     }
 
     /**
+     * @param \DateTime $endedAt
+     */
+    public function setEndedAt(\DateTime $endedAt)
+    {
+        $this->endedAt = $endedAt;
+    }
+
+    /**
+     * @return \DateTime $endedAt
+     */
+    public function getEndedAt()
+    {
+        return $this->endedAt;
+    }
+
+    /**
      * @param array $extracted
      */
     public function setExtracted(array $extracted = [])
@@ -129,6 +151,22 @@ trait DataTrait
     public function setLoadedCount($loadedCount)
     {
         $this->loadedCount = $loadedCount;
+    }
+
+    /**
+     * @param \DateTime $startedAt
+     */
+    public function setStartedAt(\DateTime $startedAt)
+    {
+        $this->startedAt = $startedAt;
+    }
+
+    /**
+     * @return \DateTime $startedAt
+     */
+    public function getStartedAt()
+    {
+        return $this->startedAt;
     }
 
     /**

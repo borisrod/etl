@@ -101,7 +101,7 @@ class MongoEmbedManyGetOneOrEmbedOneTransformer implements TransformerInterface
     {
         $task = $transformation->getTask();
         $data = $task->getData();
-        $currentExtractedRecord = $data->setCurrentExtractedRecord();
+        $currentExtractedRecord = $data->getCurrentExtractedRecord();
 
         if (!isset($currentExtractedRecord[$this->options['embed']]) ) {
             return;

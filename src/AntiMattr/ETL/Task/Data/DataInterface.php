@@ -39,6 +39,16 @@ interface DataInterface
     public function getCurrentIteration();
 
     /**
+     * @param \DateTime $endedAt
+     */
+    public function setEndedAt(\DateTime $endedAt);
+
+    /**
+     * @return \DateTime $endedAt
+     */
+    public function getEndedAt();
+
+    /**
      * @param array $extracted
      */
     public function setExtracted(array $extracted = []);
@@ -62,6 +72,16 @@ interface DataInterface
      * @param integer $loadedCount
      */
     public function setLoadedCount($loadedCount);
+
+    /**
+     * @param \DateTime $startedAt
+     */
+    public function setStartedAt(\DateTime $startedAt);
+
+    /**
+     * @return \DateTime $startedAt
+     */
+    public function getStartedAt();
 
     /**
      * @param array $extracted

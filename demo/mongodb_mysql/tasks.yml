@@ -8,6 +8,7 @@ imports:
   - { resource: "task_products.yml" }
   - { resource: "task_product_attributes.yml" }
   - { resource: "task_sellables.yml" }
+  - { resource: "task_sellable_flashes.yml" }
   - { resource: "task_sellers.yml" }
   - { resource: "task_suppliers.yml" }
 
@@ -26,5 +27,6 @@ services:
         products: @antimattr.etl_task.products
         product_attributes: @antimattr.etl_task.product_attributes
         sellables: @antimattr.etl_task.sellables
+        sellable_flashes: @antimattr.etl_task.sellable_flashes
         sellers: @antimattr.etl_task.sellers
         suppliers: @antimattr.etl_task.suppliers

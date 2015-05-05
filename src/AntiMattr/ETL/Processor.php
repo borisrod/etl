@@ -91,6 +91,8 @@ class Processor
             return;
         }
 
+        $dataObject->setStartedAt($startTime);
+
         if (!$extractor = $task->getExtractor()) {
             $this->logError(sprintf("%s.%s %s not configured", $this->alias, $taskName, 'RuntimeException', 'ExtractorInterface'));
             $this->finish($startTime, $taskName);
@@ -157,6 +159,7 @@ class Processor
                 return;
             }
 
+            $data->setEndedAt(new \DateTime());
             try {
                 $this->logInfo(sprintf("%s.%s %s Transformed records to load via %s", $this->alias, $taskName, $data->getTransformedCount(), get_class($loader)));
                 $loader->load();
