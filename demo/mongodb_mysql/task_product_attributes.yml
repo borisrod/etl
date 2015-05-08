@@ -11,7 +11,7 @@ services:
       - 'product_attributes'
       - 'updatedAt'
       - '2000-01-01 EST'
-      - { 'attributeValues': 1 }
+      - { '_id': 1, 'attributeValues': 1 }
     calls:
       - [ 'setPerPage', [ 500 ] ]
       - [ 'setBatchField', [ 'attributeValues._id' ] ]
@@ -33,13 +33,9 @@ services:
     properties:
       configuration:
         -
-          field: 'attributeValues'
+          field: '_id'
           name: 'productId'
           transformers:
-            -
-              class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoEmbedOneTransformer
-              properties:
-                options: { 'field': '_id' }
             - @antimattr.etl_transformer.mongodb.mongoid
         -
           field: 'attributeValues'
@@ -84,5 +80,4 @@ services:
           field: '_id'
           name: 'updatedAt'
           transformers:
-          transformers:
-            - @antimattr.etl_transformer.mongodb.mongodate
+            - @antimattr.etl_transformer.notnull.notnull_date
