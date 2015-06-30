@@ -9,14 +9,14 @@
  * file that was distributed with this source code.
  */
 
-namespace AntiMattr\ETL\Task\Data;
+namespace AntiMattr\ETL\Task\DataContext;
 
 use AntiMattr\ETL\Task\TaskInterface;
 
 /**
  * @author Matthew Fitzgerald <matthewfitz@gmail.com>
  */
-interface DataInterface
+interface DataContextInterface
 {
     /**
      * @param array $currentExtractedRecord

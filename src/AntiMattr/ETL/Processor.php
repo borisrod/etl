@@ -11,13 +11,19 @@
 
 namespace AntiMattr\ETL;
 
+use AntiMattr\ETL\Event\TaskEvent;
+use AntiMattr\ETL\Event\TransformationEvent;
 use AntiMattr\ETL\Exception\ExtractException;
 use AntiMattr\ETL\Exception\LoadException;
 use AntiMattr\ETL\Exception\TransformException;
 use AntiMattr\ETL\Exception\TransformationContinueException;
+use AntiMattr\ETL\Task\DataContext\DataContextInterface;
+use AntiMattr\ETL\Task\TaskInterface;
+use AntiMattr\ETL\Transform\TransformationInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * @author Matthew Fitzgerald <matthewfitz@gmail.com>
@@ -27,6 +33,9 @@ class Processor
     /** @var string 'default' */
     protected $alias;
 
+    /** @var \Symfony\Component\EventDispatcher\EventDispatcherInterface */
+    protected $eventDispatcher;
+
     /** @var \Psr\Log\LoggerInterface */
     protected $logger;
 
@@ -34,12 +43,14 @@ class Processor
     protected $tasks;
 
     /**
-     * @param string                   $alias
-     * @param \Psr\Log\LoggerInterface $logger
+     * @param string                                                      $alias
+     * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $eventDispatcher
+     * @param \Psr\Log\LoggerInterface                                    $logger
      */
-    public function __construct($alias = 'default', LoggerInterface $logger = null)
+    public function __construct($alias = 'default', EventDispatcherInterface $eventDispatcher, LoggerInterface $logger = null)
     {
         $this->alias = $alias;
+        $this->eventDispatcher = $eventDispatcher;
         $this->logger = $logger;
         $this->tasks = new ArrayCollection();
     }
@@ -85,13 +96,13 @@ class Processor
             return;
         }
 
-        if (!$dataObject = $task->getData()) {
-            $this->logError(sprintf("%s.%s %s not configured", $this->alias, $taskName, 'RuntimeException', 'DataInterface'));
+        if (!$dataContext = $task->getDataContext()) {
+            $this->logError(sprintf("%s.%s %s not configured", $this->alias, $taskName, 'RuntimeException', 'DataContextInterface'));
             $this->finish($startTime, $taskName);
             return;
         }
 
-        $dataObject->setStartedAt($startTime);
+        $dataContext->setStartedAt($startTime);
 
         if (!$extractor = $task->getExtractor()) {
             $this->logError(sprintf("%s.%s %s not configured", $this->alias, $taskName, 'RuntimeException', 'ExtractorInterface'));
@@ -99,75 +110,112 @@ class Processor
             return;
         }
 
+        if (!$taskListener = $task->getListener()) {
+            $this->logError(sprintf("%s.%s %s not configured", $this->alias, $taskName, 'RuntimeException', 'TaskListenerInterface'));
+            $this->finish($startTime, $taskName);
+            return;
+        }
+
+        if (!$loader = $task->getLoader()) {
+            $this->logError(sprintf("%s.%s %s not configured", $this->alias, $taskName, 'RuntimeException', 'LoaderInterface'));
+            $this->finish($startTime, $taskName);
+            return;
+        }
+
         // Run Extract
         try {
-            $pages = $extractor->getPages();
-            $this->logInfo(sprintf("%s.%s %s Extracted pages of records", $this->alias, $taskName, count($pages)));
+            $iterator = $extractor->getIterator();
+            $this->logInfo(sprintf("%s.%s Extracted Batch Iterator", $this->alias, $taskName));
         } catch (LoadException $e) {
             $this->logError(sprintf("%s.%s %s %s", $this->alias, $taskName, 'LoadException', $e->getMessage()));
             $this->finish($startTime, $taskName);
             return;
         }
 
-        if (empty($pages)) {
-            $this->finish($startTime, $taskName);
-            return;
-        }
-
         // Run Transformations
         $transformations = $task->getTransformations();
+        $task->setDataContext($dataContext);
+        $taskEventName = sprintf(
+            "%s.%s.task.complete",
+            $this->alias,
+            $taskName
+        );
 
-        foreach ($pages as $page) {
-            $data = clone $dataObject;
-            $task->setData($data);
-            $data->setExtracted($page);
-            foreach ($data->getExtracted() as $iteration => $extractedRecord) {
-                $data->setCurrentIteration($iteration);
-                $data->setCurrentExtractedRecord($extractedRecord);
-                $data->setCurrentTransformedRecord([]);
-                foreach ($transformations as $transformation) {
-                    try {
-                        $transformation->shouldContinue();
-                        $field = $transformation->getField();
-                        $value = $extractedRecord[$field];
+        $this->eventDispatcher->addListener($taskEventName, array($taskListener, 'onComplete'));
 
-                        $transformers = $transformation->getTransformers();
-                        foreach ($transformers as $transformer) {
-                            try {
-                                $value = $transformer->transform($value, $transformation);
-                                $transformer->bind($value, $transformation);
-                            } catch (TransformException $e) {
-                                $this->logError(sprintf("%s.%s %s %s", $this->alias, $taskName, 'TransformException', $e->getMessage()));
-                            }
-                        }
+        foreach ($iterator as $iteration => $extractedRecord) {
+            $dataContext->setCurrentIteration($iteration);
+            $dataContext->setCurrentExtractedRecord($extractedRecord);
+            $dataContext->setCurrentTransformedRecord([]);
+
+            foreach ($transformations as $transformationKey => $transformation) {
+                $transformationEventName = sprintf(
+                    "%s.%s.transformation.%s.complete",
+                    $this->alias,
+                    $taskName,
+                    $transformationKey
+                );
+
+                if (!$this->eventDispatcher->hasListeners($transformationEventName) && $transformationListener = $transformation->getListener()) {
+                    $this->eventDispatcher->addListener($transformationEventName, array($transformationListener, 'onComplete'));
+                }
+
+                try {
+                    $transformation->shouldContinue();
+                    $field = $transformation->getField();
+                    $value = $extractedRecord[$field];
+
+                    $transformers = $transformation->getTransformers();
+                    foreach ($transformers as $transformer) {
                         try {
-                            $transformation->postTransform();
+                            $value = $transformer->transform($value, $transformation);
+                            $transformer->bind($value, $transformation);
                         } catch (TransformException $e) {
                             $this->logError(sprintf("%s.%s %s %s", $this->alias, $taskName, 'TransformException', $e->getMessage()));
                         }
-                    } catch (TransformationContinueException $e) {
-                        continue;
                     }
+                    try {
+                        $transformation->postTransform();
+                    } catch (TransformException $e) {
+                        $this->logError(sprintf("%s.%s %s %s", $this->alias, $taskName, 'TransformException', $e->getMessage()));
+                    }
+                } catch (TransformationContinueException $e) {
+                    continue;
                 }
-                $data->unsetExtractedOffset($iteration);
+
+                $transformationEvent = $this->createTransformationEvent($transformation);
+
+                try {
+                    $this->eventDispatcher->dispatch($transformationEventName, $transformationEvent);
+                } catch (LoadException $e) {
+                    $this->logError(sprintf("%s.%s %s %s", $this->alias, $taskName, 'LoadException', $e->getMessage()));
+                }
             }
 
-            // Run Load
-            if (!$loader = $task->getLoader()) {
-                $this->logError(sprintf("%s.%s %s not configured", $this->alias, $taskName, 'RuntimeException', 'LoaderInterface'));
-                $this->finish($startTime, $taskName);
-                return;
-            }
+            if (true === $iterator->isBatchComplete()) {
+                $this->logInfo(sprintf("%s.%s %s Transformed extract records to load via %s", $this->alias, $taskName, $dataContext->getTransformedCount(), get_class($loader)));
+                $taskEvent = $this->createTaskEvent($task);
 
-            $data->setEndedAt(new \DateTime());
-            try {
-                $this->logInfo(sprintf("%s.%s %s Transformed records to load via %s", $this->alias, $taskName, $data->getTransformedCount(), get_class($loader)));
-                $loader->load();
-                $this->logInfo(sprintf("%s.%s %s Loaded records affected", $this->alias, $taskName, $data->getLoadedCount()));
-                $loader->postLoad();
-            } catch (LoadException $e) {
-                $this->logError(sprintf("%s.%s %s %s", $this->alias, $taskName, 'LoadException', $e->getMessage()));
+                try {
+                    $this->eventDispatcher->dispatch($taskEventName, $taskEvent);
+                    $this->logInfo(sprintf("%s.%s %s Loaded records affected", $this->alias, $taskName, $dataContext->getLoadedCount()));
+                } catch (LoadException $e) {
+                    $this->logError(sprintf("%s.%s %s %s", $this->alias, $taskName, 'LoadException', $e->getMessage()));
+                }
+
+                $dataContext = $this->cloneDataContext($dataContext);
+                $task->setDataContext($dataContext);
             }
+        }
+
+        $this->logInfo(sprintf("%s.%s %s Transformed extract records to load via %s", $this->alias, $taskName, $dataContext->getTransformedCount(), get_class($loader)));
+        $taskEvent = $this->createTaskEvent($task);
+
+        try {
+            $this->eventDispatcher->dispatch($taskEventName, $taskEvent);
+            $this->logInfo(sprintf("%s.%s %s Loaded records affected", $this->alias, $taskName, $dataContext->getLoadedCount()));
+        } catch (LoadException $e) {
+            $this->logError(sprintf("%s.%s %s %s", $this->alias, $taskName, 'LoadException', $e->getMessage()));
         }
 
         $this->finish($startTime, $taskName);
@@ -190,6 +238,32 @@ class Processor
                 $diff->format('%H:%I:%S')
             )
         );
+    }
+
+    /**
+     * @param \AntiMattr\ETL\Task\DataContext\DataContextInterface $dataContext
+     */
+    protected function cloneDataContext(DataContextInterface $dataContext)
+    {
+        return clone $dataContext;
+    }
+
+    /**
+     * @param \AntiMattr\ETL\Task\TaskInterface $task
+     * @param \AntiMattr\ETL\Event\TransformationEvent
+     */
+    protected function createTaskEvent(TaskInterface $task)
+    {
+        return new TaskEvent($task);
+    }
+
+    /**
+     * @param \AntiMattr\ETL\Transform\TransformationInterface $transformation
+     * @param \AntiMattr\ETL\Event\TransformationEvent
+     */
+    protected function createTransformationEvent(TransformationInterface $transformation)
+    {
+        return new TransformationEvent($transformation);
     }
 
     protected function logError($message)

@@ -11,6 +11,7 @@
 
 namespace AntiMattr\ETL\Transform;
 
+use AntiMattr\ETL\Listener\TransformationListenerInterface;
 use AntiMattr\ETL\Task\TaskInterface;
 use AntiMattr\ETL\Transform\Transformer\TransformerInterface;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -52,6 +53,16 @@ interface TransformationInterface
      * @return string
      */
     public function getField();
+
+    /**
+     * @param \AntiMattr\ETL\Listener\TransformationListenerInterface
+     */
+    public function setListener(TransformationListenerInterface $listener);
+
+    /**
+     * @return \AntiMattr\ETL\Listener\TransformationListenerInterface
+     */
+    public function getListener();
 
     /**
      * @return string

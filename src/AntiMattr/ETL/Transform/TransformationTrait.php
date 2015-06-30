@@ -11,9 +11,12 @@
 
 namespace AntiMattr\ETL\Transform;
 
-use AntiMattr\ETL\Task\TaskInterface;
+
 use AntiMattr\ETL\Exception\TransformationContinueException;
 use AntiMattr\ETL\Exception\TransformException;
+use AntiMattr\ETL\Listener\TransformationListener;
+use AntiMattr\ETL\Listener\TransformationListenerInterface;
+use AntiMattr\ETL\Task\TaskInterface;
 use AntiMattr\ETL\Transform\Transformer\TransformerInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -35,6 +38,9 @@ trait TransformationTrait
     /** @var string */
     public $name;
 
+    /** @var \AntiMattr\ETL\Listener\TransformationListener */
+    protected $listener;
+
     /** @var \AntiMattr\ETL\Task\TaskTrait */
     protected $task;
 
@@ -43,6 +49,7 @@ trait TransformationTrait
 
     public function __construct()
     {
+        $this->listener = new TransformationListener();
         $this->transformers = new ArrayCollection();
     }
 
@@ -98,13 +105,13 @@ trait TransformationTrait
      */
     public function shouldContinue()
     {
-        $data = $this->task->getData();
-        $currentExtractedRecord = $data->getCurrentExtractedRecord();
+        $dataContext = $this->task->getDataContext();
+        $currentExtractedRecord = $dataContext->getCurrentExtractedRecord();
 
         if (!isset($currentExtractedRecord[$this->field])) {
-            $currentTransformedRecord = $data->getCurrentTransformedRecord();
+            $currentTransformedRecord = $dataContext->getCurrentTransformedRecord();
             $currentTransformedRecord[$this->name] = $this->defaultValue;
-            $data->setCurrentTransformedRecord($currentTransformedRecord);
+            $dataContext->setCurrentTransformedRecord($currentTransformedRecord);
             $this->postTransform();
             throw new TransformationContinueException();
         }
@@ -115,18 +122,18 @@ trait TransformationTrait
      */
     public function postTransform()
     {
-        $data = $this->task->getData();
-        $currentTransformedRecord = $data->getCurrentTransformedRecord();
+        $dataContext = $this->task->getDataContext();
+        $currentTransformedRecord = $dataContext->getCurrentTransformedRecord();
 
         if (empty($currentTransformedRecord)) {
             return;
         }
 
-        $transformed = $data->getTransformed();
-        $currentIteration = $data->getCurrentIteration();
+        $transformed = $dataContext->getTransformed();
+        $currentIteration = $dataContext->getCurrentIteration();
 
         $transformed[$currentIteration] = $currentTransformedRecord;
-        $data->setTransformed($transformed);
+        $dataContext->setTransformed($transformed);
     }
 
     /**
@@ -159,6 +166,22 @@ trait TransformationTrait
     public function getName()
     {
         return $this->name;
+    }
+
+    /**
+     * @param \AntiMattr\ETL\Listener\TransformationListenerInterface
+     */
+    public function setListener(TransformationListenerInterface $listener)
+    {
+        $this->listener = $listener;
+    }
+
+    /**
+     * @return \AntiMattr\ETL\Listener\TransformationListenerInterface
+     */
+    public function getListener()
+    {
+        return $this->listener;
     }
 
     /**

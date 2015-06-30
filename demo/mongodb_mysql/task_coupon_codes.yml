@@ -2,6 +2,7 @@ services:
   # Extractors
   antimattr.etl_extractor.coupon_codes_max_id:
     class: AntiMattr\ETL\Extract\MongoDB\PDOMaximumColumnObjectIdExtractor
+    lazy: true
     public: false
     arguments:
       - @antimattr.etl_mongodb_database
@@ -10,18 +11,22 @@ services:
       - @antimattr.etl_mysql_connection
       - 'coupon_codes'
       - 'id'
-    calls:
-      - [ 'setPerPage', [ 500 ] ]
+      - ~
+      - { '_id': 1, 'seller': 1, 'active': 1, 'code': 1, 'discountPercentage': 1, 'freeShipping': 1, 'perUserMax': 1, 'maxUses': 1, 'numUses': 1 }
+      - { '_id': 1 }
+      - 500
 
   # Loaders
   antimattr.etl_loader.coupon_codes:
     class: AntiMattr\ETL\Load\MySQL\MySQLReplaceIntoLoader
+    lazy: true
     public: false
     arguments: [ @antimattr.etl_mysql_connection, 'coupon_codes' ]
 
   # Tasks
   antimattr.etl_task.coupon_codes:
     class: "%antimattr.etl_task_common.class%"
+    lazy: true
     calls:
       - [ 'setExtractor', [ @antimattr.etl_extractor.coupon_codes_max_id ] ]
       - [ 'setLoader', [ @antimattr.etl_loader.coupon_codes ] ]

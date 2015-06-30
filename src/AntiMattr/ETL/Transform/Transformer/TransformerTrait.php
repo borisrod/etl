@@ -28,10 +28,10 @@ trait TransformerTrait
     public function bind($value, TransformationInterface $transformation)
     {
         $task = $transformation->getTask();
-        $data = $task->getData();
+        $dataContext = $task->getDataContext();
         $name = $transformation->getName();
-        $currentTransformedRecord = $data->getCurrentTransformedRecord();
+        $currentTransformedRecord = $dataContext->getCurrentTransformedRecord();
         $currentTransformedRecord[$name] = $value;
-        $data->setCurrentTransformedRecord($currentTransformedRecord);
+        $dataContext->setCurrentTransformedRecord($currentTransformedRecord);
     }
 }

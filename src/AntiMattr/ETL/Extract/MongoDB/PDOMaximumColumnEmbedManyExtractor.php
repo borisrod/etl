@@ -16,33 +16,44 @@ namespace AntiMattr\ETL\Extract\MongoDB;
  */
 class PDOMaximumColumnEmbedManyExtractor extends PDOMaximumColumnExtractor
 {
-    /**
-     * @var string
-     */
-    protected $batchField;
+    /** @var string */
+    protected $column;
 
-    /**
-     * @var string
-     */
-    protected $embedManyField;
+    /** @var mixed */
+    protected $defaultValue;
 
-    /**
-     * @string $batchField
-     */
-    public function setBatchField($batchField)
+    /** @var string */
+    protected $field;
+
+    public function __construct(
+        \MongoDB $db,
+        $collection,
+        $field,
+        \PDO $connection,
+        $table,
+        $column,
+        $defaultValue = null,
+        array $projection = [],
+        array $sort = [],
+        $embedManyField,
+        $batchSize = null)
     {
-        $this->batchField = $batchField;
+        $this->collection = $collection;
+        $this->column = $column;
+        $this->connection = $connection;
+        $this->db = $db;
+        $this->defaultValue = $defaultValue;
+        $this->field = $field;
+        $this->projection = $projection;
+        $this->sort = $sort;
+        $this->table = $table;
+        $this->batchIterator = new MongoDBEmbedManyBatchIterator($embedManyField, $batchSize);
     }
 
     /**
-     * @string $embedManyField
+     * @return \Iterator
      */
-    public function setEmbedManyField($embedManyField)
-    {
-        $this->embedManyField = $embedManyField;
-    }
-
-    public function getPages()
+    public function getIterator()
     {
         $sql = sprintf(
             "select max(%s) as 'maximum' from %s;",
@@ -54,98 +65,29 @@ class PDOMaximumColumnEmbedManyExtractor extends PDOMaximumColumnExtractor
         $value = $this->getMaximumValue($statement);
 
         if ($value) {
-            $cursor = $collection->find([$this->field => [ '$gt' => $value ] ], $this->projection);
+            $cursor = $collection
+                ->find([$this->field => [ '$gt' => $value ] ], $this->projection)
+                ->sort([ $this->field => 1 ]);
         } else {
-            $cursor = $collection->find([], $this->projection);
+            $cursor = $collection->find([], $this->projection)->sort([ $this->field => 1 ]);
         }
 
-        $this->buildPagesFromCursor($cursor);
-
-        return $this->pages;
+        $this->batchIterator->setInnerIterator($cursor);
+        return $this->batchIterator;
     }
 
     /**
-     * @param \MongoCursor $cursor
-     */
-    protected function buildPagesFromCursor(\MongoCursor $cursor)
-    {
-        $results = iterator_to_array($cursor);
-        $expandedResults = [];
-        foreach($results as $record) {
-            if (!isset($record[$this->embedManyField]) || empty($record[$this->embedManyField])) {
-                continue;
-            }
-
-            foreach ($record[$this->embedManyField] as $embed) {
-                $alteredRecord = $record;
-                $alteredRecord[$this->embedManyField] = $embed;
-                $expandedResults[] = $alteredRecord;
-            }
-        }
-
-        if (!isset($this->perPage)) {
-            $this->pages = $this->createArrayCollection($expandedResults);
-        } elseif ($this->batchField) {
-            $batches = [];
-            $batchId = 0;
-            $batchIteration = 0;
-            $previousBatchId = null;
-            $currentBatchId = null;
-
-            foreach ($expandedResults as $key => $record) {
-                if (!isset($batches[$batchId])) {
-                    $batches[$batchId] = [];
-                    $batchIteration = 0;
-                    $previousBatchId = null;
-                }
-
-                $currentBatchId = $this->getNestedArrayValue($record, $this->batchField);
-
-                if ($batchIteration < $this->perPage) {
-                    $batches[$batchId][] = $record;
-                    $batchIteration++;
-                    $previousBatchId = $currentBatchId;
-                    continue;
-                }
-
-                if ($previousBatchId == $currentBatchId) {
-                    $batches[$batchId][] = $record;
-                    $batchIteration++;
-                    continue;
-                }
-                $batchId++;
-                $batches[$batchId] = [];
-                $batchIteration = 0;
-                $batches[$batchId][] = $record;
-                $previousBatchId = null;
-            }
-
-            $this->pages = $this->createArrayCollection($batches);
-        } else {
-            $this->pages = $this->createArrayCollection(array_chunk($results, $this->perPage, true));
-        }
-    }
-
-    /**
-     * Ex: 'attributes._id'
+     * @param \PDOStatement $statement
      *
-     * @param array $record
-     * @param string $selector
-     *
-     * @return mixed
+     * @return mixed $value
      */
-    protected function getNestedArrayValue($record, $selector)
+    protected function getMaximumValue(\PDOStatement $statement)
     {
-        $keys = explode('.', $selector);
-
-        foreach ($keys as $key) {
-            if (!is_array($record) || !isset($record[$key])) {
-                break;
-            }
-
-            $record = $record[$key];
+        $result = $statement->fetchObject();
+        if (!isset($result) || !isset($result->maximum)) {
+            return $this->defaultValue;
         }
 
-        return $record;
+        return $result->maximum;
     }
 }

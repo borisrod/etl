@@ -12,9 +12,11 @@
 namespace AntiMattr\ETL\Task;
 
 use AntiMattr\ETL\Extract\ExtractorInterface;
+use AntiMattr\ETL\Listener\TaskListener;
+use AntiMattr\ETL\Listener\TaskListenerInterface;
 use AntiMattr\ETL\Load\LoaderInterface;
-use AntiMattr\ETL\Task\Data\CommonData;
-use AntiMattr\ETL\Task\Data\DataInterface;
+use AntiMattr\ETL\Task\DataContext\CommonDataContext;
+use AntiMattr\ETL\Task\DataContext\DataContextInterface;
 use AntiMattr\ETL\Transform\TransformationInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -24,14 +26,17 @@ use Doctrine\Common\Collections\Collection;
  */
 trait TaskTrait
 {
-    /** @var \AntiMattr\ETL\Task\Data\DataInterface */
-    protected $data;
+    /** @var \AntiMattr\ETL\Task\DataContext\DataContextInterface */
+    protected $dataContext;
 
     /** @var string */
     public $defaultTransformationClass = 'AntiMattr\ETL\Transform\CommonTransformation';
 
     /** @var \AntiMattr\ETL\Extract\ExtractorInterface */
     protected $extractor;
+
+    /** @var \AntiMattr\ETL\Listener\TransformationListenerInterface */
+    protected $listener;
 
     /** @var \AntiMattr\ETL\Load\LoaderInterface */
     protected $loader;
@@ -47,8 +52,9 @@ trait TaskTrait
 
     public function __construct()
     {
-        $this->data = new CommonData();
-        $this->data->setTask($this);
+        $this->dataContext = new CommonDataContext();
+        $this->dataContext->setTask($this);
+        $this->listener = new TaskListener();
         $this->transformations = new ArrayCollection();
     }
 
@@ -76,21 +82,21 @@ trait TaskTrait
     }
 
     /**
-     * @return \AntiMattr\ETL\Task\Data\DataInterface
+     * @return \AntiMattr\ETL\Task\DataContext\DataContextInterface
      */
-    public function getData()
+    public function getDataContext()
     {
-        return $this->data;
+        return $this->dataContext;
     }
 
     /**
-     * @param \AntiMattr\ETL\Task\Data\DataInterface
+     * @param \AntiMattr\ETL\Task\DataContext\DataContextInterface
      */
-    public function setData(DataInterface $data)
+    public function setDataContext(DataContextInterface $dataContext)
     {
-        $this->data = $data;
-        if ($this !== $data->getTask()) {
-            $data->setTask($this);
+        $this->dataContext = $dataContext;
+        if ($this !== $dataContext->getTask()) {
+            $dataContext->setTask($this);
         }
     }
 
@@ -111,6 +117,22 @@ trait TaskTrait
         if ($this !== $extractor->getTask()) {
             $extractor->setTask($this);
         }
+    }
+
+    /**
+     * @param \AntiMattr\ETL\Listener\TaskListenerInterface
+     */
+    public function setListener(TaskListenerInterface $listener)
+    {
+        $this->listener = $listener;
+    }
+
+    /**
+     * @return \AntiMattr\ETL\Listener\TaskListenerInterface
+     */
+    public function getListener()
+    {
+        return $this->listener;
     }
 
     /**

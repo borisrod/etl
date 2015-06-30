@@ -10,18 +10,22 @@ services:
       - @antimattr.etl_mysql_connection
       - 'admin_users'
       - 'id'
-    calls:
-      - [ 'setPerPage', [ 500 ] ]
+      - ~
+      - { '_id': 1, 'ldapUsername': 1 }
+      - { '_id': 1 }
+      - 100
 
   # Loaders
   antimattr.etl_loader.admin_users:
     class: AntiMattr\ETL\Load\MySQL\MySQLReplaceIntoLoader
+    lazy: true
     public: false
     arguments: [ @antimattr.etl_mysql_connection, 'admin_users' ]
 
   # Tasks
   antimattr.etl_task.admin_users:
     class: "%antimattr.etl_task_common.class%"
+    lazy: true
     calls:
       - [ 'setExtractor', [ @antimattr.etl_extractor.admin_users_max_id ] ]
       - [ 'setLoader', [ @antimattr.etl_loader.admin_users ] ]

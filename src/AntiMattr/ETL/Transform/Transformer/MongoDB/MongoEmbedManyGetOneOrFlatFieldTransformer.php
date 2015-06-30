@@ -97,8 +97,8 @@ class MongoEmbedManyGetOneOrFlatFieldTransformer implements TransformerInterface
     protected function getFlatValue($value, TransformationInterface $transformation)
     {
         $task = $transformation->getTask();
-        $data = $task->getData();
-        $currentExtractedRecord = $data->getCurrentExtractedRecord();
+        $dataContext = $task->getDataContext();
+        $currentExtractedRecord = $dataContext->getCurrentExtractedRecord();
 
         if (!isset($currentExtractedRecord[$this->options['flat_field']]) ) {
             return;

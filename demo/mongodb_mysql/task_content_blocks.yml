@@ -2,6 +2,7 @@ services:
   # Extractors
   antimattr.etl_extractor.content_blocks_max_updated_at:
     class: AntiMattr\ETL\Extract\MongoDB\PDOMaximumColumnDateExtractor
+    lazy: true
     public: false
     arguments:
       - @antimattr.etl_mongodb_database
@@ -11,19 +12,23 @@ services:
       - 'content_blocks'
       - 'updatedAt'
       - '2000-01-01 EST'
+      - { '_id': 1, 'key': 1, 'createdAt': 1, 'goLiveDateTime': 1, 'endDateTime': 1, 'updatedAt': 1, 'content': 1, 'title': 1 }
+      - [ ]
+      - 500
     calls:
-      - [ 'setPerPage', [ 500 ] ]
       - [ 'setTimezone', [ 'EST' ] ]
 
   # Loaders
   antimattr.etl_loader.content_blocks:
     class: AntiMattr\ETL\Load\MySQL\MySQLReplaceIntoLoader
+    lazy: true
     public: false
     arguments: [ @antimattr.etl_mysql_connection, 'content_blocks' ]
 
   # Tasks
   antimattr.etl_task.content_blocks:
     class: "%antimattr.etl_task_common.class%"
+    lazy: true
     calls:
       - [ 'setExtractor', [ @antimattr.etl_extractor.content_blocks_max_updated_at ] ]
       - [ 'setLoader', [ @antimattr.etl_loader.content_blocks ] ]

@@ -12,23 +12,12 @@
 namespace AntiMattr\ETL\Extract;
 
 use AntiMattr\ETL\Task\TaskInterface;
-use Doctrine\Common\Collections\Collection;
 
 /**
  * @author Matthew Fitzgerald <matthewfitz@gmail.com>
  */
-interface ExtractorInterface
+interface ExtractorInterface extends \IteratorAggregate
 {
-    /**
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getPages();
-
-    /**
-     * @param integer $perPage
-     */
-    public function setPerPage($perPage);
-
     /**
      * @param AntiMattr\ETL\Task\TaskInterface
      */

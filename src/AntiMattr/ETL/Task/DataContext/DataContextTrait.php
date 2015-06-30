@@ -9,14 +9,14 @@
  * file that was distributed with this source code.
  */
 
-namespace AntiMattr\ETL\Task\Data;
+namespace AntiMattr\ETL\Task\DataContext;
 
 use AntiMattr\ETL\Task\TaskInterface;
 
 /**
  * @author Matthew Fitzgerald <matthewfitz@gmail.com>
  */
-trait DataTrait
+trait DataContextTrait
 {
     /** @var array */
     protected $currentExtractedRecord = [];
@@ -47,6 +47,17 @@ trait DataTrait
 
     /** @var \AntiMattr\ETL\Task\TaskInterface */
     protected $task;
+
+    public function __clone()
+    {
+        $this->currentExtractedRecord = [];
+        $this->currentTransformedRecord = [];
+        $this->currentIteration = null;
+        $this->extractedCount;
+        $this->extracted = [];
+        $this->loadedCount;
+        $this->transformed = [];
+    }
 
     /**
      * @param array $currentExtractedRecord

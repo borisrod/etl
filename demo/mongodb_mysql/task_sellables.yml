@@ -2,6 +2,7 @@ services:
   # Extractors
   antimattr.etl_extractor.sellables_max_updated_at:
     class: AntiMattr\ETL\Extract\MongoDB\PDOMaximumColumnDateExtractor
+    lazy: true
     public: false
     arguments:
       - @antimattr.etl_mongodb_database
@@ -11,19 +12,56 @@ services:
       - 'sellables'
       - 'updatedAt'
       - '2000-01-01 EST'
+      -
+        '_id': 1
+        'deletedAt': 1
+        'createdAt': 1
+        'updatedAt': 1
+        'product': 1
+        'name': 1
+        'slug': 1
+        'category': 1
+        'seller': 1
+        'originator': 1
+        'liveDate': 1
+        'endDate': 1
+        'clearance': 1
+        'primaryTaxon': 1
+        'mrch': 1
+        'freeShipping': 1
+        'insp': 1
+        'loveCount': 1
+        'numOrders': 1
+        'ps': 1
+        'exclusive': 1
+        'disc': 1
+        'cs': 1
+        'hero': 1
+        'sort': 1
+        'estimatedShippingDays': 1
+        'description': 1
+        'customizable': 1
+        'pt': 1
+        'subscription': 1
+        'media': 1
+        'shippingPrices': 1
+        'shippingPrice': 1
+      - [ ]
+      - 500
     calls:
-      - [ 'setPerPage', [ 500 ] ]
       - [ 'setTimezone', [ 'EST' ] ]
 
   # Loaders
   antimattr.etl_loader.sellables:
     class: AntiMattr\ETL\Load\MySQL\MySQLReplaceIntoLoader
+    lazy: true
     public: false
     arguments: [ @antimattr.etl_mysql_connection, 'sellables' ]
 
   # Tasks
   antimattr.etl_task.sellables:
     class: "%antimattr.etl_task_common.class%"
+    lazy: true
     calls:
       - [ 'setExtractor', [ @antimattr.etl_extractor.sellables_max_updated_at ] ]
       - [ 'setLoader', [ @antimattr.etl_loader.sellables ] ]

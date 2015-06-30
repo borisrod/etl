@@ -33,14 +33,13 @@ The execution flow of the processor is:
 
 ```text
 Processor::executeTask
-  => getExtractor::getPages
-     => foreach page
-        => getTransformations
-           => foreach transformation
-              => getTransformers
-                 => transform
-                 => bind
-        => getLoader::load
+  => foreach iterator
+    => foreach transformations
+      => foreach transformer
+        => transform
+          => bind
+    => load a completed batch
+  => load remaining data
 ```
 
 Features
