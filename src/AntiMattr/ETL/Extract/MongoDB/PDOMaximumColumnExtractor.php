@@ -64,13 +64,14 @@ class PDOMaximumColumnExtractor extends MongoDBExtractor
         $statement = $this->connection->query($sql);
         $collection = $this->db->{$this->collection};
         $value = $this->getMaximumValue($statement);
+        $sort = (empty($this->sort)) ? [ $this->field => 1 ] : $this->sort;
 
         if ($value) {
             $cursor = $collection
                 ->find([$this->field => [ '$gt' => $value ] ], $this->projection)
-                ->sort([ $this->field => 1 ]);
+                ->sort($sort);
         } else {
-            $cursor = $collection->find([], $this->projection)->sort([ $this->field => 1 ]);
+            $cursor = $collection->find([], $this->projection)->sort($sort);
         }
 
         $this->batchIterator->setInnerIterator($cursor);

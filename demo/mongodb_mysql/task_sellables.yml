@@ -46,7 +46,7 @@ services:
         'media': 1
         'shippingPrices': 1
         'shippingPrice': 1
-      - [ ]
+      - { '_id': 1 }
       - 500
     calls:
       - [ 'setTimezone', [ 'EST' ] ]

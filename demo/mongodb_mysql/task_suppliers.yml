@@ -13,7 +13,7 @@ services:
       - 'updatedAt'
       - '2000-01-01 EST'
       - [ ]
-      - [ ]
+      - { '_id': 1 }
       - 500
     calls:
       - [ 'setTimezone', [ 'EST' ] ]
