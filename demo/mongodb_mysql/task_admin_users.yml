@@ -11,6 +11,7 @@ services:
       - 'admin_users'
       - 'id'
       - ~
+      - ~
       - { '_id': 1, 'ldapUsername': 1 }
       - { '_id': 1 }
       - 100

@@ -11,8 +11,11 @@ services:
       - @antimattr.etl_mysql_connection
       - 'sellables_flashes'
       - 'updatedAt'
+      - ~
       - '2000-01-01 EST'
-      - { '_id': 1, 'attributeValues': 1 }
+      -
+        '_id': 1
+        'flashes': 1
       - { '_id': 1 }
       - 'attributeValues'
       - 500
@@ -67,28 +70,43 @@ services:
               properties:
                 options: { 'field': 'endDate' }
             - @antimattr.etl_transformer.mongodb.mongodate
-        - { field: 'estimatedItems' }
         -
-          field: 'freeShipping'
+          field: 'flashes'
+          name: 'estimatedItems'
+          transformers:
+            -
+              class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoEmbedOneTransformer
+              properties:
+                options: { 'field': 'estimatedItems' }
+        -
+          field: 'flashes'
           name: 'freeshipping'
           transformers:
+            -
+              class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoEmbedOneTransformer
+              properties:
+                options: { 'field': 'freeShipping' }
             - @antimattr.etl_transformer.scalar.html_utf8
             -
               class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
               properties:
                 options: { 'maxlength': 10 }
         -
-          field: 'freeShipping'
+          field: 'flashes'
+          name: 'discount'
           transformers:
-            - @antimattr.etl_transformer.scalar.html_utf8
             -
-              class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
+              class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoEmbedOneTransformer
               properties:
-                options: { 'maxlength': 10 }
-        - { field: 'discount' }
+                options: { 'field': 'discount' }
         -
-          field: 'allowCredits'
+          field: 'flashes'
+          name: 'allowCredits'
           transformers:
+            -
+              class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoEmbedOneTransformer
+              properties:
+                options: { 'field': 'allowCredits' }
             - @antimattr.etl_transformer.mongodb.mongoboolean
         -
           field: '_id'

@@ -11,6 +11,7 @@ services:
       - @antimattr.etl_mysql_connection
       - 'suppliers'
       - 'updatedAt'
+      - ~
       - '2000-01-01 EST'
       - [ ]
       - { '_id': 1 }

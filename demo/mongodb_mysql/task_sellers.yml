@@ -11,6 +11,7 @@ services:
       - @antimattr.etl_mysql_connection
       - 'sellers'
       - 'updatedAt'
+      - ~
       - '2000-01-01 EST'
       - [ ]
       - { '_id': 1 }
@@ -135,6 +136,7 @@ services:
             - @antimattr.etl_transformer.mongodb.mongodate
         - { field: 'promotable' }
         - { field: 'coPilotReplenishmentAmount' }
+        - { field: 'disc' }
         -
           field: 'metadata'
           name: 'status'

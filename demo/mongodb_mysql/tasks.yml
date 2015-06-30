@@ -10,7 +10,11 @@ imports:
   - { resource: "task_sellables.yml" }
   - { resource: "task_sellable_flashes.yml" }
   - { resource: "task_sellers.yml" }
+  - { resource: "task_seller_follower.yml" }
   - { resource: "task_suppliers.yml" }
+  - { resource: "task_supplier_billing_address.yml" }
+  - { resource: "task_supplier_returns_address.yml" }
+  - { resource: "task_supplier_shipping_address.yml" }
 
 services:
   # Register task collection
@@ -30,4 +34,8 @@ services:
         sellables: @antimattr.etl_task.sellables
         sellable_flashes: @antimattr.etl_task.sellable_flashes
         sellers: @antimattr.etl_task.sellers
+        seller_follower: @antimattr.etl_task.seller_follower
         suppliers: @antimattr.etl_task.suppliers
+        supplier_billing_address: @antimattr.etl_task.supplier_billing_address
+        supplier_returns_address: @antimattr.etl_task.supplier_returns_address
+        supplier_shipping_address: @antimattr.etl_task.supplier_shipping_address

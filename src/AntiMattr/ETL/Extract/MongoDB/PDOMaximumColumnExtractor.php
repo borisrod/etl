@@ -21,11 +21,20 @@ class PDOMaximumColumnExtractor extends MongoDBExtractor
     /** @var string */
     protected $column;
 
+    /** @var \PDO */
+    protected $connection;
+
+    /** @var string */
+    protected $criteria;
+
     /** @var mixed */
     protected $defaultValue;
 
     /** @var string */
     protected $field;
+
+    /** @var string */
+    protected $table;
 
     public function __construct(
         \MongoDB $db,
@@ -34,6 +43,7 @@ class PDOMaximumColumnExtractor extends MongoDBExtractor
         \PDO $connection,
         $table,
         $column,
+        $criteria = '',
         $defaultValue = null,
         array $projection = [],
         array $sort = [],
@@ -42,6 +52,7 @@ class PDOMaximumColumnExtractor extends MongoDBExtractor
         $this->collection = $collection;
         $this->column = $column;
         $this->connection = $connection;
+        $this->criteria = $criteria;
         $this->db = $db;
         $this->defaultValue = $defaultValue;
         $this->field = $field;
@@ -57,9 +68,10 @@ class PDOMaximumColumnExtractor extends MongoDBExtractor
     public function getIterator()
     {
         $sql = sprintf(
-            "select max(%s) as 'maximum' from %s;",
+            "select max(%s) as 'maximum' from %s %s;",
             $this->column,
-            $this->table
+            $this->table,
+            $this->criteria
         );
         $statement = $this->connection->query($sql);
         $collection = $this->db->{$this->collection};
