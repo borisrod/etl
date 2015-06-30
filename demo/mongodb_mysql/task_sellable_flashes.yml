@@ -2,6 +2,7 @@ services:
   # Extractors
   antimattr.etl_extractor.sellable_flashes_max_updated_at:
     class: AntiMattr\ETL\Extract\MongoDB\PDOMaximumColumnEmbedManyDateExtractor
+    lazy: true
     public: false
     arguments:
       - @antimattr.etl_mongodb_database
@@ -12,21 +13,23 @@ services:
       - 'updatedAt'
       - '2000-01-01 EST'
       - { '_id': 1, 'attributeValues': 1 }
+      - []
+      - 'attributeValues'
+      - 500
     calls:
-      - [ 'setPerPage', [ 500 ] ]
-      - [ 'setBatchField', [ '_id' ] ]
-      - [ 'setEmbedManyField', [ 'flashes' ] ]
       - [ 'setTimezone', [ 'EST' ] ]
 
   # Loaders
   antimattr.etl_loader.sellable_flashes:
     class: AntiMattr\ETL\Load\MySQL\MySQLDeleteByColumnInsertIntoLoader
+    lazy: true
     public: false
     arguments: [ @antimattr.etl_mysql_connection, 'sellables_flashes', 'sellableId' ]
 
   # Tasks
   antimattr.etl_task.sellable_flashes:
     class: "%antimattr.etl_task_common.class%"
+    lazy: true
     calls:
       - [ 'setExtractor', [ @antimattr.etl_extractor.sellable_flashes_max_updated_at ] ]
       - [ 'setLoader', [ @antimattr.etl_loader.sellable_flashes ] ]

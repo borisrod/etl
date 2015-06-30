@@ -37,8 +37,8 @@ class NotNullToDateTransformer implements TransformerInterface
         }
 
         $task = $transformation->getTask();
-        $data = $task->getData();
-        $date = $data->getStartedAt();
+        $dataContext = $task->getDataContext();
+        $date = $dataContext->getStartedAt();
 
         if (isset($this->options['timezone'])) {
             $date->setTimezone(new \DateTimeZone($this->options['timezone']));

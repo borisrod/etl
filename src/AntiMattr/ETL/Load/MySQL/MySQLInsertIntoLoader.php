@@ -12,20 +12,26 @@
 namespace AntiMattr\ETL\Load\MySQL;
 
 use AntiMattr\ETL\Exception\LoadException;
+use AntiMattr\ETL\Load\LoaderInterface;
+use AntiMattr\ETL\Load\LoaderTrait;
 
 /**
  * @author Matthew Fitzgerald <matthewfitz@gmail.com>
  */
-class MySQLDeleteByColumnInsertIntoLoader extends MySQLReplaceIntoLoader
+class MySQLInsertIntoLoader implements LoaderInterface
 {
-    /** @var string */
-    protected $column;
+    use LoaderTrait;
 
-    public function __construct(\PDO $connection, $table, $column)
+    /** @var string */
+    protected $connection;
+
+    /** @var string */
+    protected $table;
+
+    public function __construct(\PDO $connection, $table)
     {
         $this->connection = $connection;
         $this->table = $table;
-        $this->column = $column;
     }
 
     /**
@@ -48,14 +54,7 @@ class MySQLDeleteByColumnInsertIntoLoader extends MySQLReplaceIntoLoader
 
         $valuePlaceholders = [];
         $values = [];
-        $foreignKeys = [];
         foreach ($transformed as $row) {
-            if (!isset($row[$this->column])) {
-                continue;
-            }
-
-            $foreignKeys[] = $row[$this->column];
-
             $result = [];
             $count = sizeof($row);
             if ($count > 0) {
@@ -68,30 +67,18 @@ class MySQLDeleteByColumnInsertIntoLoader extends MySQLReplaceIntoLoader
             $valuePlaceholders[] = '(' . implode(',', $result) . ')';
         }
 
-        $deleteSql = sprintf(
-            "DELETE FROM %s WHERE %s IN(%s);",
-            $this->table,
-            $this->column,
-            implode(',', array_map(function($id){
-                return sprintf("'%s'", $id);
-            }, $foreignKeys))
-        );
-
-        $insertSql = sprintf(
-            "INSERT INTO %s (%s) VALUES %s;",
+        $sql = sprintf(
+            "INSERT INTO %s (%s) VALUES %s",
             $this->table,
             $columns,
             implode(',', $valuePlaceholders)
         );
 
-        $loadedCount = 0;
-
         $this->connection->beginTransaction();
         try {
-            $delete = $this->connection->prepare($deleteSql);
-            $delete->execute();
+            $statement = $this->connection->prepare($sql);
+            $statement->execute($values);
             $this->connection->commit();
-            $loadedCount += $delete->rowCount();
         } catch (PDOException $e){
             try {
                 $this->connection->rollBack();
@@ -102,22 +89,6 @@ class MySQLDeleteByColumnInsertIntoLoader extends MySQLReplaceIntoLoader
             throw new LoadException($e->getMessage());
         }
 
-        $this->connection->beginTransaction();
-        try {
-            $insert = $this->connection->prepare($insertSql);
-            $insert->execute($values);
-            $this->connection->commit();
-            $loadedCount += $insert->rowCount();
-        } catch (PDOException $e){
-            try {
-                $this->connection->rollBack();
-            } catch (Exception $rollback) {
-
-            }
-
-            throw new LoadException($e->getMessage());
-        }
-
-        $dataContext->setLoadedCount($loadedCount);
+        $dataContext->setLoadedCount($statement->rowCount());
     }
 }

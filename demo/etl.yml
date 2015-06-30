@@ -22,6 +22,7 @@ services:
   # Connections
   antimattr.etl_mongodb_connection:
     class: MongoClient
+    lazy: true
     public: false
     arguments:
       - "%antimattr.etl_mongodb_connection.server%"
@@ -29,21 +30,29 @@ services:
       - "%antimattr.etl_mongodb_connection.driver_options%"
   antimattr.etl_mongodb_database:
     class: MongoDB
+    lazy: true
     public: false
     factory: [ @antimattr.etl_mongodb_connection, 'selectDB' ]
     arguments: [ 'opensky_devo' ]
   antimattr.etl_mysql_connection:
     class: PDO
+    lazy: true
     public: false
     arguments:
       - "%antimattr.etl_mysql_connection.dsn%"
       - "%antimattr.etl_mysql_connection.username%"
       - "%antimattr.etl_mysql_connection.password%"
 
+  # Event Dispatchers
+  event_dispatcher_mongodb_mysql:
+    class: Symfony\Component\EventDispatcher\EventDispatcher
+    lazy: true
+
   # Processors
   mongodb_mysql:
     class: "%antimattr.etl_processor.class%"
+    lazy: true
     factory: [ "%antimattr.etl_processor_factory.class%", 'getProcessor' ]
-    arguments: [ 'mongodb_mysql', @logger_mongodb_mysql ]
+    arguments: [ 'mongodb_mysql', @event_dispatcher_mongodb_mysql, @logger_mongodb_mysql ]
     calls:
       - [ 'setTasks', [ @antimattr.etl_tasks.mongodb_mysql ] ]

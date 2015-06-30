@@ -9,12 +9,12 @@
  * file that was distributed with this source code.
  */
 
-namespace AntiMattr\ETL\Task\Data;
+namespace AntiMattr\ETL\Task\DataContext;
 
 /**
  * @author Matthew Fitzgerald <matthewfitz@gmail.com>
  */
-class CommonData implements DataInterface
+class CommonDataContext implements DataContextInterface
 {
-    use DataTrait;
+    use DataContextTrait;
 }

@@ -2,27 +2,37 @@ services:
   # Transformers
   antimattr.etl_transformer.mongodb.mongodate:
     class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoDateTransformer
+    lazy: true
     properties:
       options: { 'format': 'Y-m-d H:i:s', 'timezone': 'EST' }
   antimattr.etl_transformer.mongodb.mongoid_date:
     class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoIdToDateTransformer
+    lazy: true
     properties:
       options: { 'format': 'Y-m-d H:i:s', 'timezone': 'EST' }
   antimattr.etl_transformer.mongodb.mongoboolean:
     class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoBooleanTransformer
+    lazy: true
     properties:
       options: { 'true': 1, 'false': 0 }
   antimattr.etl_transformer.mongodb.mongoid:
     class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoIdTransformer
+    lazy: true
   antimattr.etl_transformer.mongodb.mongodbref:
     class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoDBRefTransformer
+    lazy: true
   antimattr.etl_transformer.notnull.notnull_date:
     class: AntiMattr\ETL\Transform\Transformer\NotNull\NotNullToDateTransformer
+    lazy: true
     properties:
       options: { 'format': 'Y-m-d H:i:s' }
   antimattr.etl_transformer.scalar.html_utf8:
     class: AntiMattr\ETL\Transform\Transformer\Scalar\HTMLToUTF8Transformer
+    lazy: true
   antimattr.etl_transformer.scalar.maxlength:
     class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
+    lazy: true
   antimattr.etl_transformer.noop:
     class: AntiMattr\ETL\Transform\Transformer\NoopTransformer
+    lazy: true
+

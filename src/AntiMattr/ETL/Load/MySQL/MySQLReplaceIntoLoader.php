@@ -35,16 +35,17 @@ class MySQLReplaceIntoLoader implements LoaderInterface
     }
 
     /**
+     * @param array $transformed
+     *
      * @throws \AntiMattr\ETL\Exception\LoadException
      */
-    public function load()
+    public function load(array $transformed = [])
     {
-        $data = $this->task->getData();
-        $transformed = $data->getTransformed();
-
         if (empty($transformed)) {
             throw new LoadException("Error - No data to load");
         }
+
+        $dataContext = $this->task->getDataContext();
 
         $firstRow = array_slice($transformed, 0, 1);
         $first = array_shift($firstRow);
@@ -88,11 +89,6 @@ class MySQLReplaceIntoLoader implements LoaderInterface
             throw new LoadException($e->getMessage());
         }
 
-        $data->setLoadedCount($statement->rowCount());
-    }
-
-    public function postLoad()
-    {
-        return;
+        $dataContext->setLoadedCount($statement->rowCount());
     }
 }

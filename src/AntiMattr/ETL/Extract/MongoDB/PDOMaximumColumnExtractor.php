@@ -11,6 +11,8 @@
 
 namespace AntiMattr\ETL\Extract\MongoDB;
 
+use AntiMattr\ETL\Extract\BatchIterator;
+
 /**
  * @author Matthew Fitzgerald <matthewfitz@gmail.com>
  */
@@ -33,7 +35,9 @@ class PDOMaximumColumnExtractor extends MongoDBExtractor
         $table,
         $column,
         $defaultValue = null,
-        array $projection = [])
+        array $projection = [],
+        array $sort = [],
+        $batchSize = null)
     {
         $this->collection = $collection;
         $this->column = $column;
@@ -42,10 +46,15 @@ class PDOMaximumColumnExtractor extends MongoDBExtractor
         $this->defaultValue = $defaultValue;
         $this->field = $field;
         $this->projection = $projection;
+        $this->sort = $sort;
         $this->table = $table;
+        $this->batchIterator = new BatchIterator($batchSize);
     }
 
-    public function getPages()
+    /**
+     * @return \Iterator
+     */
+    public function getIterator()
     {
         $sql = sprintf(
             "select max(%s) as 'maximum' from %s;",
@@ -57,14 +66,15 @@ class PDOMaximumColumnExtractor extends MongoDBExtractor
         $value = $this->getMaximumValue($statement);
 
         if ($value) {
-            $cursor = $collection->find([$this->field => [ '$gt' => $value ] ], $this->projection);
+            $cursor = $collection
+                ->find([$this->field => [ '$gt' => $value ] ], $this->projection)
+                ->sort([ $this->field => 1 ]);
         } else {
-            $cursor = $collection->find([], $this->projection);
+            $cursor = $collection->find([], $this->projection)->sort([ $this->field => 1 ]);
         }
 
-        $this->buildPagesFromCursor($cursor);
-
-        return $this->pages;
+        $this->batchIterator->setInnerIterator($cursor);
+        return $this->batchIterator;
     }
 
     /**

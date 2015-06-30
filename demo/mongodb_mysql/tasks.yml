@@ -16,6 +16,7 @@ services:
   # Register task collection
   antimattr.etl_tasks.mongodb_mysql:
     class: Doctrine\Common\Collections\ArrayCollection
+    lazy: true
     arguments:
       -
         admin_users: @antimattr.etl_task.admin_users

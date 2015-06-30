@@ -12,8 +12,9 @@
 namespace AntiMattr\ETL\Task;
 
 use AntiMattr\ETL\Extract\ExtractorInterface;
+use AntiMattr\ETL\Listener\TaskListenerInterface;
 use AntiMattr\ETL\Load\LoaderInterface;
-use AntiMattr\ETL\Task\Data\DataInterface;
+use AntiMattr\ETL\Task\DataContext\DataContextInterface;
 use AntiMattr\ETL\Transform\TransformationInterface;
 use Doctrine\Common\Collections\Collection;
 
@@ -25,14 +26,14 @@ interface TaskInterface
     public function initialize();
 
     /**
-     * @return \AntiMattr\ETL\Task\Data\DataInterface
+     * @return \AntiMattr\ETL\Task\DataContext\DataContextInterface
      */
-    public function getData();
+    public function getDataContext();
 
     /**
-     * @param \AntiMattr\ETL\Task\Data\DataInterface
+     * @param \AntiMattr\ETL\Task\DataContext\DataContextInterface
      */
-    public function setData(DataInterface $data);
+    public function setDataContext(DataContextInterface $data);
 
     /**
      * @param string
@@ -48,6 +49,16 @@ interface TaskInterface
      * @param \AntiMattr\ETL\Extract\ExtractorInterface
      */
     public function setExtractor(ExtractorInterface $extractor);
+
+    /**
+     * @param \AntiMattr\ETL\Listener\TransformationListenerInterface
+     */
+    public function setListener(TaskListenerInterface $listener);
+
+    /**
+     * @return \AntiMattr\ETL\Listener\TransformationListenerInterface
+     */
+    public function getListener();
 
     /**
      * @return \AntiMattr\ETL\Load\LoaderInterface

@@ -12,36 +12,24 @@
 namespace AntiMattr\ETL\Extract;
 
 use AntiMattr\ETL\Task\TaskInterface;
-use Doctrine\Common\Collections\ArrayCollection;
 
 /**
  * @author Matthew Fitzgerald <matthewfitz@gmail.com>
  */
 trait ExtractorTrait
 {
-    /** @var \Doctrine\Common\Collections\Collection */
-    protected $pages;
-
-    /** @var integer */
-    protected $perPage;
+    /** @var \AntiMattr\ETL\Extract\BatchIterator */
+    protected $batchIterator;
 
     /** @var \AntiMattr\ETL\Task\TaskInterface */
     protected $task;
 
     /**
-     * @return \Doctrine\Common\Collections\Collection
+     * @return \AntiMattr\ETL\Extract\BatchIterator
      */
-    public function getPages()
+    public function getIterator()
     {
-        return $this->pages;
-    }
-
-    /**
-     * @param integer $perPage
-     */
-    public function setPerPage($perPage)
-    {
-        $this->perPage = $perPage;
+        return $this->batchIterator;
     }
 
     /**
@@ -58,15 +46,5 @@ trait ExtractorTrait
     public function getTask()
     {
         return $this->task;
-    }
-
-    /**
-     * @param array $results
-     *
-     * @return \Doctrine\Common\Collections\ArrayCollection
-     */
-    protected function createArrayCollection(array $data = [])
-    {
-        return new ArrayCollection($data);
     }
 }

@@ -2,6 +2,7 @@ services:
   # Extractors
   antimattr.etl_extractor.content_pages_max_updated_at:
     class: AntiMattr\ETL\Extract\MongoDB\PDOMaximumColumnDateExtractor
+    lazy: true
     public: false
     arguments:
       - @antimattr.etl_mongodb_database
@@ -12,19 +13,22 @@ services:
       - 'updatedAt'
       - '2000-01-01 EST'
       - { '_id': 1, 'slug': 1, 'createdAt': 1, 'startDate': 1, 'endDate': 1, 'updatedAt': 1 }
+      - [ ]
+      - 500
     calls:
-      - [ 'setPerPage', [ 500 ] ]
       - [ 'setTimezone', [ 'EST' ] ]
 
   # Loaders
   antimattr.etl_loader.content_pages:
     class: AntiMattr\ETL\Load\MySQL\MySQLReplaceIntoLoader
+    lazy: true
     public: false
     arguments: [ @antimattr.etl_mysql_connection, 'content_pages' ]
 
   # Tasks
   antimattr.etl_task.content_pages:
     class: "%antimattr.etl_task_common.class%"
+    lazy: true
     calls:
       - [ 'setExtractor', [ @antimattr.etl_extractor.content_pages_max_updated_at ] ]
       - [ 'setLoader', [ @antimattr.etl_loader.content_pages ] ]

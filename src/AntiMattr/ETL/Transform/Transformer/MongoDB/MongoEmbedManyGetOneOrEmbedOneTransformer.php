@@ -100,8 +100,8 @@ class MongoEmbedManyGetOneOrEmbedOneTransformer implements TransformerInterface
     protected function getValueFromEmbedOne($value, TransformationInterface $transformation)
     {
         $task = $transformation->getTask();
-        $data = $task->getData();
-        $currentExtractedRecord = $data->getCurrentExtractedRecord();
+        $dataContext = $task->getDataContext();
+        $currentExtractedRecord = $dataContext->getCurrentExtractedRecord();
 
         if (!isset($currentExtractedRecord[$this->options['embed']]) ) {
             return;

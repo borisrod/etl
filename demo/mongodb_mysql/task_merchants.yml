@@ -2,6 +2,7 @@ services:
   # Extractors
   antimattr.etl_extractor.merchants_max_id:
     class: AntiMattr\ETL\Extract\MongoDB\PDOMaximumColumnObjectIdExtractor
+    lazy: true
     public: false
     arguments:
       - @antimattr.etl_mongodb_database
@@ -10,18 +11,22 @@ services:
       - @antimattr.etl_mysql_connection
       - 'merchants'
       - 'id'
-    calls:
-      - [ 'setPerPage', [ 500 ] ]
+      - ~
+      - { '_id': 1, 'sl': 1, 'sp': 1 }
+      - { '_id': 1 }
+      - 500
 
   # Loaders
   antimattr.etl_loader.merchants:
     class: AntiMattr\ETL\Load\MySQL\MySQLReplaceIntoLoader
+    lazy: true
     public: false
     arguments: [ @antimattr.etl_mysql_connection, 'merchants' ]
 
   # Tasks
   antimattr.etl_task.merchants:
     class: "%antimattr.etl_task_common.class%"
+    lazy: true
     calls:
       - [ 'setExtractor', [ @antimattr.etl_extractor.merchants_max_id ] ]
       - [ 'setLoader', [ @antimattr.etl_loader.merchants ] ]

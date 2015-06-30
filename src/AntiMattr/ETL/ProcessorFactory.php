@@ -12,6 +12,7 @@
 namespace AntiMattr\ETL;
 
 use Psr\Log\LoggerInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * @author Matthew Fitzgerald <matthewfitz@gmail.com>
@@ -19,13 +20,14 @@ use Psr\Log\LoggerInterface;
 class ProcessorFactory
 {
     /**
-     * @param string                   $alias
-     * @param \Psr\Log\LoggerInterface $logger
+     * @param string                                                      $alias
+     * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $eventDispatcher
+     * @param \Psr\Log\LoggerInterface                                    $logger
      *
      * @return AntiMattr\ETL\Processor
      */
-    static public function getProcessor($alias, LoggerInterface $logger = null)
+    static public function getProcessor($alias, EventDispatcherInterface $eventDispatcher, LoggerInterface $logger = null)
     {
-        return new Processor($alias, $logger);
+        return new Processor($alias, $eventDispatcher, $logger);
     }
 }

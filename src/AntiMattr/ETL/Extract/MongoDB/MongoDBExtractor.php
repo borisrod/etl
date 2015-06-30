@@ -11,6 +11,7 @@
 
 namespace AntiMattr\ETL\Extract\MongoDB;
 
+use AntiMattr\ETL\Extract\BatchIterator;
 use AntiMattr\ETL\Extract\ExtractorInterface;
 use AntiMattr\ETL\Extract\ExtractorTrait;
 
@@ -33,33 +34,31 @@ class MongoDBExtractor implements ExtractorInterface
     /** @var array */
     protected $projection = [];
 
-    public function __construct(\MongoDB $db, $collection, array $query = [], array $projection = [])
+    /** @var array */
+    protected $sort = [];
+
+    public function __construct(
+        \MongoDB $db, $collection,
+        array $query = [],
+        array $projection = [],
+        array $sort = [],
+        $batchSize = null)
     {
         $this->collection = $collection;
         $this->db = $db;
         $this->query = $query;
         $this->projection = $projection;
-    }
-
-    public function getPages()
-    {
-        $cursor = $this->db->{$this->collection}->find($this->query, $this->projection);
-        $this->buildPagesFromCursor($cursor);
-
-        return $this->pages;
+        $this->sort = $sort;
+        $this->batchIterator = new BatchIterator($batchSize);
     }
 
     /**
-     * @param \MongoCursor $cursor
+     * @return \Iterator
      */
-    protected function buildPagesFromCursor(\MongoCursor $cursor)
+    public function getIterator()
     {
-        $results = iterator_to_array($cursor);
-
-        if (!isset($this->perPage)) {
-            $this->pages = $this->createArrayCollection($results);
-        } else {
-            $this->pages = $this->createArrayCollection(array_chunk($results, $this->perPage, true));
-        }
+        $cursor = $this->db->{$this->collection}->find($this->query, $this->projection)->sort($this->sort);
+        $this->batchIterator->setInnerIterator($cursor);
+        return $this->batchIterator;
     }
 }

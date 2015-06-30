@@ -19,11 +19,11 @@ use AntiMattr\ETL\Task\TaskInterface;
 interface LoaderInterface
 {
     /**
+     * @param array $transformed
+     *
      * @throws \AntiMattr\ETL\Exception\LoadException
      */
-    public function load();
-
-    public function postLoad();
+    public function load(array $transformed = []);
 
     /**
      * @param \AntiMattr\ETL\Task\TaskInterface
