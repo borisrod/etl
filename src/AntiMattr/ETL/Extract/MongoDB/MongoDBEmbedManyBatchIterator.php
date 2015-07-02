@@ -49,7 +49,6 @@ class MongoDBEmbedManyBatchIterator extends BatchIterator
     public function current()
     {
         $current = $this->innerIterator->current();
-
         if (!isset($current[$this->embedManyField])) {
             $this->batchSize = null;
             $this->count = 0;
@@ -74,6 +73,7 @@ class MongoDBEmbedManyBatchIterator extends BatchIterator
         $this->batchSize = count($embed);
         $current[$this->embedManyField] = $embed[$this->count];
         $this->count++;
+
         return $current;
     }
 
@@ -85,6 +85,7 @@ class MongoDBEmbedManyBatchIterator extends BatchIterator
         $current = $this->innerIterator->current();
 
         if (!isset($current[$this->embedManyField])) {
+            $this->count = 0;
             $this->innerIterator->next();
             return;
         }
@@ -93,7 +94,6 @@ class MongoDBEmbedManyBatchIterator extends BatchIterator
         $size = count($embed);
 
         if ($this->count < $size) {
-            $this->count++;
             return;
         }
 
