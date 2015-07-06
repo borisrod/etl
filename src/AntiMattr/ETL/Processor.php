@@ -17,6 +17,7 @@ use AntiMattr\ETL\Exception\ExtractException;
 use AntiMattr\ETL\Exception\LoadException;
 use AntiMattr\ETL\Exception\TransformException;
 use AntiMattr\ETL\Exception\TransformationContinueException;
+use AntiMattr\ETL\Lock\LockInterface;
 use AntiMattr\ETL\Task\DataContext\DataContextInterface;
 use AntiMattr\ETL\Task\TaskInterface;
 use AntiMattr\ETL\Transform\TransformationInterface;
@@ -36,6 +37,9 @@ class Processor
     /** @var \Symfony\Component\EventDispatcher\EventDispatcherInterface */
     protected $eventDispatcher;
 
+    /** @var \AntiMattr\ETL\Lock\LockInterface */
+    protected $locker;
+
     /** @var \Psr\Log\LoggerInterface */
     protected $logger;
 
@@ -47,12 +51,25 @@ class Processor
      * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $eventDispatcher
      * @param \Psr\Log\LoggerInterface                                    $logger
      */
-    public function __construct($alias = 'default', EventDispatcherInterface $eventDispatcher, LoggerInterface $logger = null)
+    public function __construct(
+        $alias = 'default',
+        EventDispatcherInterface $eventDispatcher,
+        LockInterface $locker,
+        LoggerInterface $logger = null)
     {
         $this->alias = $alias;
         $this->eventDispatcher = $eventDispatcher;
+        $this->locker = $locker;
         $this->logger = $logger;
         $this->tasks = new ArrayCollection();
+    }
+
+    /**
+     * @return string $alias
+     */
+    public function getAlias()
+    {
+        return $this->alias;
     }
 
     /**
@@ -89,6 +106,14 @@ class Processor
     {
         $startTime = new \DateTime();
         $this->logInfo(sprintf("%s.%s started", $this->alias, $taskName));
+
+        if ($this->locker->hasLock($this, $taskName)) {
+            $this->logInfo(sprintf("%s.%s has lock", $this->alias, $taskName));
+            $this->finish($startTime, $taskName);
+            return;
+        }
+
+        $this->locker->lock($this, $taskName);
 
         if (!$task = $this->tasks->get($taskName)) {
             $this->logError(sprintf("%s.%s %s not configured", $this->alias, $taskName, 'RuntimeException', 'TaskInterface'));
@@ -238,6 +263,8 @@ class Processor
                 $diff->format('%H:%I:%S')
             )
         );
+
+        $this->locker->unLock($this, $taskName);
     }
 
     /**

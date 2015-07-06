@@ -2,6 +2,7 @@ services:
   # Extractors
   antimattr.etl_extractor.admin_users_max_id:
     class: AntiMattr\ETL\Extract\MongoDB\PDOMaximumColumnObjectIdExtractor
+    lazy: true
     public: false
     arguments:
       - @antimattr.etl_mongodb_database

@@ -11,6 +11,7 @@
 
 namespace AntiMattr\ETL;
 
+use AntiMattr\ETL\Lock\LockInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -22,12 +23,13 @@ class ProcessorFactory
     /**
      * @param string                                                      $alias
      * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $eventDispatcher
+     * @param \AntiMattr\ETL\Lock\LockInterface                           $locker
      * @param \Psr\Log\LoggerInterface                                    $logger
      *
      * @return AntiMattr\ETL\Processor
      */
-    static public function getProcessor($alias, EventDispatcherInterface $eventDispatcher, LoggerInterface $logger = null)
+    static public function getProcessor($alias, EventDispatcherInterface $eventDispatcher, LockInterface $locker, LoggerInterface $logger = null)
     {
-        return new Processor($alias, $eventDispatcher, $logger);
+        return new Processor($alias, $eventDispatcher, $locker, $logger);
     }
 }

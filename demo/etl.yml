@@ -4,11 +4,13 @@ imports:
   - { resource: "mongodb_mysql/tasks.yml" }
 
 parameters:
+  antimattr.etl_locker.class: AntiMattr\ETL\Lock\CommonFileLock
   antimattr.etl_processor_factory.class: AntiMattr\ETL\ProcessorFactory
   antimattr.etl_processor.class: AntiMattr\ETL\Processor
   antimattr.etl_task_common.class: AntiMattr\ETL\Task\CommonTask
   antimattr.etl_transformation_common.class: AntiMattr\ETL\Transform\CommonTransformation
   doctrine.array_collection.class: Doctrine\Common\Collections\ArrayCollection
+  antimattr.etl_lock.path: 'demo/logs'
   antimattr.etl_log.path: 'demo/logs/etl.log'
   antimattr.etl_log.level: 'debug'
   antimattr.etl_mongodb_connection.server: 'mongodb://localhost:27017'
@@ -48,11 +50,18 @@ services:
     class: Symfony\Component\EventDispatcher\EventDispatcher
     lazy: true
 
+  # Lockers
+  locker_mongodb_mysql:
+    class: "%antimattr.etl_locker.class%"
+    lazy: true
+    public: false
+    arguments: [ "%antimattr.etl_lock.path%" ]
+
   # Processors
   mongodb_mysql:
     class: "%antimattr.etl_processor.class%"
     lazy: true
     factory: [ "%antimattr.etl_processor_factory.class%", 'getProcessor' ]
-    arguments: [ 'mongodb_mysql', @event_dispatcher_mongodb_mysql, @logger_mongodb_mysql ]
+    arguments: [ 'mongodb_mysql', @event_dispatcher_mongodb_mysql, @locker_mongodb_mysql, @logger_mongodb_mysql ]
     calls:
       - [ 'setTasks', [ @antimattr.etl_tasks.mongodb_mysql ] ]
