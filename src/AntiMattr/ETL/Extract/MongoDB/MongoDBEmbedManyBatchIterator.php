@@ -40,7 +40,7 @@ class MongoDBEmbedManyBatchIterator extends BatchIterator
             return false;
         }
 
-        if (($this->count + 1) % $this->batchSize === 0) {
+        if (($this->count) % $this->batchSize === 0) {
             return true;
         }
 

@@ -24,8 +24,16 @@ class MongoDBEmbedManyBatchIteratorTest extends AntiMattrTestCase
         $expectedKey = 0;
         foreach ($this->batchIterator as $key => $iteration) {
             $this->assertEquals($expectedKey, $key);
+
+            if ($key === 2 || $key === 4 || $key === 7) {
+                $this->assertTrue($this->batchIterator->isBatchComplete());
+            } else {
+                $this->assertFalse($this->batchIterator->isBatchComplete());
+            }
+
             $data[] = $iteration;
             $expectedKey++;
+
         }
 
         $this->assertEquals(8, count($data));

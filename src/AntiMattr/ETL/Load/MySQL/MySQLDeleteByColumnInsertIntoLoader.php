@@ -68,6 +68,8 @@ class MySQLDeleteByColumnInsertIntoLoader extends MySQLReplaceIntoLoader
             $valuePlaceholders[] = '(' . implode(',', $result) . ')';
         }
 
+        $foreignKeys = array_unique($foreignKeys);
+
         $deleteSql = sprintf(
             "DELETE FROM %s WHERE %s IN(%s);",
             $this->table,
