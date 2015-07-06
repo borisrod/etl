@@ -18,6 +18,9 @@ use AntiMattr\ETL\Extract\BatchIterator;
  */
 class MongoDBEmbedManyBatchIterator extends BatchIterator
 {
+    /** @var integer */
+    protected $key;
+
     /** @var string */
     protected $embedManyField;
 
@@ -25,6 +28,7 @@ class MongoDBEmbedManyBatchIterator extends BatchIterator
     {
         $this->embedManyField = $embedManyField;
         $this->batchSize = $batchSize;
+        $this->key = 0;
     }
 
     /**
@@ -82,8 +86,9 @@ class MongoDBEmbedManyBatchIterator extends BatchIterator
      */
     public function next()
     {
-        $current = $this->innerIterator->current();
+        $this->key++;
 
+        $current = $this->innerIterator->current();
         if (!isset($current[$this->embedManyField])) {
             $this->count = 0;
             $this->innerIterator->next();
@@ -106,7 +111,7 @@ class MongoDBEmbedManyBatchIterator extends BatchIterator
      */
     public function key()
     {
-        return $this->innerIterator->key();
+        return $this->key;
     }
 
     /**
@@ -123,6 +128,7 @@ class MongoDBEmbedManyBatchIterator extends BatchIterator
     public function rewind()
     {
         $this->count = 0;
+        $this->key = 0;
         $this->innerIterator->rewind();
     }
 }

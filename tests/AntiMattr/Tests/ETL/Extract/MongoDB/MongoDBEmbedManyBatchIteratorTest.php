@@ -21,8 +21,11 @@ class MongoDBEmbedManyBatchIteratorTest extends AntiMattrTestCase
     public function testEmbedManyIterator()
     {
         $data = [];
-        foreach ($this->batchIterator as $iteration) {
+        $expectedKey = 0;
+        foreach ($this->batchIterator as $key => $iteration) {
+            $this->assertEquals($expectedKey, $key);
             $data[] = $iteration;
+            $expectedKey++;
         }
 
         $this->assertEquals(8, count($data));
