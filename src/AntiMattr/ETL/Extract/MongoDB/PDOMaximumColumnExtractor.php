@@ -83,7 +83,7 @@ class PDOMaximumColumnExtractor extends MongoDBExtractor
             $fieldCriteria = [ '$gt' => $minValue ];
             $maxValue = $this->getMaximumValue($statement);
             if ($maxValue) {
-                $fieldCriteria['$lte'] => $maxValue;
+                $fieldCriteria['$lte'] = $maxValue;
             }
 
             $cursor = $collection
