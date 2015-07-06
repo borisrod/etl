@@ -49,19 +49,26 @@ class PDOMaximumColumnEmbedManyExtractor extends PDOMaximumColumnExtractor
     public function getIterator()
     {
         $sql = sprintf(
-            "select max(%s) as 'maximum' from %s %s;",
+            "select max(%s) as 'minimum' from %s %s;",
             $this->column,
             $this->table,
             $this->criteria
         );
         $statement = $this->connection->query($sql);
         $collection = $this->db->{$this->collection};
-        $value = $this->getMaximumValue($statement);
+        $minValue = $this->getMinimumValue($statement);
         $sort = (empty($this->sort)) ? [ $this->field => 1 ] : $this->sort;
 
-        if ($value) {
+        if ($minValue) {
+
+            $fieldCriteria = [ '$gt' => $minValue ];
+            $maxValue = $this->getMaximumValue($statement);
+            if ($maxValue) {
+                $fieldCriteria['$lte'] => $maxValue;
+            }
+
             $cursor = $collection
-                ->find([$this->field => [ '$gt' => $value ] ], $this->projection)
+                ->find([$this->field => $fieldCriteria ], $this->projection)
                 ->sort($sort);
         } else {
             $cursor = $collection->find([], $this->projection)->sort($sort);
@@ -69,20 +76,5 @@ class PDOMaximumColumnEmbedManyExtractor extends PDOMaximumColumnExtractor
 
         $this->batchIterator->setInnerIterator($cursor);
         return $this->batchIterator;
-    }
-
-    /**
-     * @param \PDOStatement $statement
-     *
-     * @return mixed $value
-     */
-    protected function getMaximumValue(\PDOStatement $statement)
-    {
-        $result = $statement->fetchObject();
-        if (!isset($result) || !isset($result->maximum)) {
-            return $this->defaultValue;
-        }
-
-        return $result->maximum;
     }
 }

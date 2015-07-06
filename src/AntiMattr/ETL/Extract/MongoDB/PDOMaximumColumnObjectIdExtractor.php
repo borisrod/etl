@@ -21,13 +21,13 @@ class PDOMaximumColumnObjectIdExtractor extends PDOMaximumColumnExtractor
      *
      * @return \MongoId
      */
-    protected function getMaximumValue(\PDOStatement $statement)
+    protected function getMinimumValue(\PDOStatement $statement)
     {
         $result = $statement->fetchObject();
-        if (!isset($result) || !isset($result->maximum)) {
+        if (!isset($result) || !isset($result->minimum)) {
             return;
         }
 
-        return new \MongoId($result->maximum);
+        return new \MongoId($result->minimum);
     }
 }

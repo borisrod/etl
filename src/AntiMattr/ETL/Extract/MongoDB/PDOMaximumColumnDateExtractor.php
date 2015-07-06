@@ -34,19 +34,29 @@ class PDOMaximumColumnDateExtractor extends PDOMaximumColumnExtractor
      *
      * @return \MongoDate
      */
-    protected function getMaximumValue(\PDOStatement $statement)
+    protected function getMinimumValue(\PDOStatement $statement)
     {
         $result = $statement->fetchObject();
-        if (!isset($result) || !isset($result->maximum)) {
+        if (!isset($result) || !isset($result->minimum)) {
             return new \MongoDate(strtotime($this->defaultValue));
         }
 
         if ($this->timezone) {
-            $date = $result->maximum . ' ' . $this->timezone;
+            $date = $result->minimum . ' ' . $this->timezone;
         } else {
-            $date = $result->maximum;
+            $date = $result->minimum;
         }
 
         return new \MongoDate(strtotime($date));
+    }
+
+    /**
+     * @param \PDOStatement $statement
+     *
+     * @return mixed $value
+     */
+    protected function getMaximumValue(\PDOStatement $statement)
+    {
+        return new \MongoDate();
     }
 }
