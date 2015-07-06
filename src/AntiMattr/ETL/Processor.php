@@ -108,8 +108,7 @@ class Processor
         $this->logInfo(sprintf("%s.%s started", $this->alias, $taskName));
 
         if ($this->locker->hasLock($this, $taskName)) {
-            $this->logInfo(sprintf("%s.%s has lock", $this->alias, $taskName));
-            $this->finish($startTime, $taskName);
+            $this->logInfo(sprintf("%s.%s has lock, exiting", $this->alias, $taskName));
             return;
         }
 
