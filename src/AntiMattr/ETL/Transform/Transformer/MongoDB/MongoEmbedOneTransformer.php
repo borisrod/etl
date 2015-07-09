@@ -34,10 +34,10 @@ class MongoEmbedOneTransformer implements TransformerInterface
     public function transform($value, TransformationInterface $transformation)
     {
         if (!isset($this->options['field'])) {
-            throw new TransformException("MongoEmbedOneTransformer: Required $this->options['field']");
+            throw new TransformException("MongoEmbedOneTransformer: Required options[field]");
         }
 
-        if (!isset($value[$this->options['field']]) ) {
+        if (null === $value || false === isset($value[$this->options['field']])) {
             return isset($this->options['default']) ? $this->options['default'] : null;
         }
 

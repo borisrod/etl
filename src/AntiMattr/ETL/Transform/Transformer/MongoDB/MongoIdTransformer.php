@@ -32,6 +32,10 @@ class MongoIdTransformer implements TransformerInterface
      */
     public function transform($value, TransformationInterface $transformation)
     {
+        if (null === $value) {
+            return;
+        }
+
         return (string) $value;
     }
 }

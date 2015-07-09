@@ -33,6 +33,10 @@ class MongoDBRefTransformer implements TransformerInterface
      */
     public function transform($value, TransformationInterface $transformation)
     {
+        if (null === $value) {
+            return;
+        }
+
         if (is_array($value) && isset($value['$id'])) {
             return (string) $value['$id'];
         } elseif ($value instanceof \MongoDBRef) {
