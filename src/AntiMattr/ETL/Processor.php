@@ -150,7 +150,7 @@ class Processor
         try {
             $iterator = $extractor->getIterator();
             $this->logInfo(sprintf("%s.%s Extracted Batch Iterator", $this->alias, $taskName));
-        } catch (LoadException $e) {
+        } catch (ExtractException $e) {
             $this->logError(sprintf("%s.%s %s %s", $this->alias, $taskName, 'LoadException', $e->getMessage()));
             $this->finish($startTime, $taskName);
             return;
