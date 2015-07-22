@@ -22,7 +22,7 @@ class MySQLInsertIntoLoader implements LoaderInterface
 {
     use LoaderTrait;
 
-    /** @var string */
+    /** @var \PDO */
     protected $connection;
 
     /** @var string */
