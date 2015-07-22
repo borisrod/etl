@@ -38,7 +38,8 @@ class MongoDBExtractor implements ExtractorInterface
     protected $sort = [];
 
     public function __construct(
-        \MongoDB $db, $collection,
+        \MongoDB $db,
+        $collection,
         array $query = [],
         array $projection = [],
         array $sort = [],
