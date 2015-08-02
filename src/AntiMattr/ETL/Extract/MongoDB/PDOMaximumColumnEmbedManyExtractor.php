@@ -28,7 +28,8 @@ class PDOMaximumColumnEmbedManyExtractor extends PDOMaximumColumnExtractor
         array $projection = [],
         array $sort = [],
         $embedManyField,
-        $batchSize = null)
+        $batchSize = null,
+        $timeout = 30000)
     {
         $this->collection = $collection;
         $this->column = $column;
@@ -40,6 +41,7 @@ class PDOMaximumColumnEmbedManyExtractor extends PDOMaximumColumnExtractor
         $this->projection = $projection;
         $this->sort = $sort;
         $this->table = $table;
+        $this->timeout = $timeout;
         $this->batchIterator = new MongoDBEmbedManyBatchIterator($embedManyField, $batchSize);
     }
 
@@ -69,9 +71,10 @@ class PDOMaximumColumnEmbedManyExtractor extends PDOMaximumColumnExtractor
 
             $cursor = $collection
                 ->find([$this->field => $fieldCriteria ], $this->projection)
-                ->sort($sort);
+                ->sort($sort)
+                ->timeout($this->timeout);
         } else {
-            $cursor = $collection->find([], $this->projection)->sort($sort);
+            $cursor = $collection->find([], $this->projection)->sort($sort)->timeout($this->timeout);
         }
 
         $this->batchIterator->setInnerIterator($cursor);
