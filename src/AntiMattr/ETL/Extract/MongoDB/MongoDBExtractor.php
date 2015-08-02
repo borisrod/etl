@@ -37,19 +37,24 @@ class MongoDBExtractor implements ExtractorInterface
     /** @var array */
     protected $sort = [];
 
+    /** @var integer */
+    protected $timeout;
+
     public function __construct(
         \MongoDB $db,
         $collection,
         array $query = [],
         array $projection = [],
         array $sort = [],
-        $batchSize = null)
+        $batchSize = null,
+        $timeout = 30000)
     {
         $this->collection = $collection;
         $this->db = $db;
         $this->query = $query;
         $this->projection = $projection;
         $this->sort = $sort;
+        $this->timeout = $timeout;
         $this->batchIterator = new BatchIterator($batchSize);
     }
 
@@ -58,7 +63,7 @@ class MongoDBExtractor implements ExtractorInterface
      */
     public function getIterator()
     {
-        $cursor = $this->db->{$this->collection}->find($this->query, $this->projection)->sort($this->sort);
+        $cursor = $this->db->{$this->collection}->find($this->query, $this->projection)->sort($this->sort)->timeout($this->timeout);
         $this->batchIterator->setInnerIterator($cursor);
         return $this->batchIterator;
     }

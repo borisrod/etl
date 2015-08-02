@@ -47,7 +47,8 @@ class PDOMaximumColumnExtractor extends MongoDBExtractor
         $defaultValue = null,
         array $projection = [],
         array $sort = [],
-        $batchSize = null)
+        $batchSize = null,
+        $timeout = 30000)
     {
         $this->collection = $collection;
         $this->column = $column;
@@ -59,6 +60,7 @@ class PDOMaximumColumnExtractor extends MongoDBExtractor
         $this->projection = $projection;
         $this->sort = $sort;
         $this->table = $table;
+        $this->timeout = $timeout;
         $this->batchIterator = new BatchIterator($batchSize);
     }
 
@@ -88,9 +90,10 @@ class PDOMaximumColumnExtractor extends MongoDBExtractor
 
             $cursor = $collection
                 ->find([$this->field => $fieldCriteria ], $this->projection)
-                ->sort($sort);
+                ->sort($sort)
+                ->timeout($timeout);
         } else {
-            $cursor = $collection->find([], $this->projection)->sort($sort);
+            $cursor = $collection->find([], $this->projection)->sort($sort)->timeout($this->timeout);
         }
 
         $this->batchIterator->setInnerIterator($cursor);

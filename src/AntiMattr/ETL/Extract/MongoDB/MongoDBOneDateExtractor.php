@@ -33,7 +33,8 @@ class MongoDBOneDateExtractor extends MongoDBExtractor
         $modify,
         array $projection = [],
         array $sort = [],
-        $batchSize = null)
+        $batchSize = null,
+        $timeout = 30000)
     {
         $this->collection = $collection;
         $this->db = $db;
@@ -41,6 +42,7 @@ class MongoDBOneDateExtractor extends MongoDBExtractor
         $this->modify = $modify;
         $this->projection = $projection;
         $this->sort = $sort;
+        $this->timeout = $timeout;
         $this->batchIterator = new BatchIterator($batchSize);
     }
 
@@ -64,7 +66,7 @@ class MongoDBOneDateExtractor extends MongoDBExtractor
             $this->field => [ '$gt' => $min, '$lte' => $max ]
         ];
 
-        $cursor = $this->db->{$this->collection}->find($fieldCriteria, $this->projection)->sort($this->sort);
+        $cursor = $this->db->{$this->collection}->find($fieldCriteria, $this->projection)->sort($this->sort)->timeout($this->timeout);
         $this->batchIterator->setInnerIterator($cursor);
         return $this->batchIterator;
     }
