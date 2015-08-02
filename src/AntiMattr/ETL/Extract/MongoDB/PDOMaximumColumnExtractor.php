@@ -91,7 +91,7 @@ class PDOMaximumColumnExtractor extends MongoDBExtractor
             $cursor = $collection
                 ->find([$this->field => $fieldCriteria ], $this->projection)
                 ->sort($sort)
-                ->timeout($timeout);
+                ->timeout($this->timeout);
         } else {
             $cursor = $collection->find([], $this->projection)->sort($sort)->timeout($this->timeout);
         }
