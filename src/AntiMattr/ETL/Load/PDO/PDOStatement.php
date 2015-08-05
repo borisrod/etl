@@ -42,7 +42,7 @@ class PDOStatement extends \PDOStatement
      *
      * @return string
      */
-    public function debugQuery($replaced = true)
+    public function getDebugQuery($replaced = true)
     {
         $q = $this->queryString;
 
@@ -50,7 +50,7 @@ class PDOStatement extends \PDOStatement
             return $q;
         }
 
-        return preg_replace_callback('/:([0-9a-z_]+)/i', array($this, 'debugReplace'), $q);
+        return preg_replace_callback('/:([0-9a-z_]+)/i', array($this, 'createDebugQuery'), $q);
     }
 
     /**
@@ -58,7 +58,7 @@ class PDOStatement extends \PDOStatement
      *
      * @return string
      */
-    protected function debugReplace(array $matched = [])
+    protected function createDebugQuery(array $matched = [])
     {
         $value = $this->debugValues[$matched[1]];
         if ($value === null) {
