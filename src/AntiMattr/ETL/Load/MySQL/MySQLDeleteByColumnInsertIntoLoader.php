@@ -94,10 +94,10 @@ class MySQLDeleteByColumnInsertIntoLoader extends MySQLReplaceIntoLoader
             $delete->execute();
             $this->connection->commit();
             $loadedCount += $delete->rowCount();
-        } catch (PDOException $e){
+        } catch (\PDOException $e){
             try {
                 $this->connection->rollBack();
-            } catch (Exception $rollback) {
+            } catch (\Exception $rollback) {
 
             }
 
@@ -110,10 +110,10 @@ class MySQLDeleteByColumnInsertIntoLoader extends MySQLReplaceIntoLoader
             $insert->execute($values);
             $this->connection->commit();
             $loadedCount += $insert->rowCount();
-        } catch (PDOException $e){
+        } catch (\PDOException $e){
             try {
                 $this->connection->rollBack();
-            } catch (Exception $rollback) {
+            } catch (\Exception $rollback) {
 
             }
 

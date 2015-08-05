@@ -79,10 +79,10 @@ class MySQLInsertIntoLoader implements LoaderInterface
             $statement = $this->connection->prepare($sql);
             $statement->execute($values);
             $this->connection->commit();
-        } catch (PDOException $e){
+        } catch (\PDOException $e){
             try {
                 $this->connection->rollBack();
-            } catch (Exception $rollback) {
+            } catch (\Exception $rollback) {
 
             }
 
