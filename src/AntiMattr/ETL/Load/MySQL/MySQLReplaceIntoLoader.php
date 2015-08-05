@@ -14,6 +14,7 @@ namespace AntiMattr\ETL\Load\MySQL;
 use AntiMattr\ETL\Exception\LoadException;
 use AntiMattr\ETL\Load\LoaderInterface;
 use AntiMattr\ETL\Load\LoaderTrait;
+use AntiMattr\ETL\Load\PDO\PDOStatement;
 
 /**
  * @author Matthew Fitzgerald <matthewfitz@gmail.com>
@@ -86,7 +87,18 @@ class MySQLReplaceIntoLoader implements LoaderInterface
 
             }
 
-            throw new LoadException($e->getMessage());
+            $query = $statement->queryString;
+            if ($statement instanceof PDOStatement) {
+                $query = $statement->getDebugQuery();
+            }
+
+            $message = sprintf(
+                "Error: %s Query: %s",
+                $e->getMessage(),
+                $query
+            );
+
+            throw new LoadException($message);
         }
 
         $dataContext->setLoadedCount($statement->rowCount());

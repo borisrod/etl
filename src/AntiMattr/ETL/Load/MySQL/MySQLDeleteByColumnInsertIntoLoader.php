@@ -12,6 +12,7 @@
 namespace AntiMattr\ETL\Load\MySQL;
 
 use AntiMattr\ETL\Exception\LoadException;
+use AntiMattr\ETL\Load\PDO\PDOStatement;
 
 /**
  * @author Matthew Fitzgerald <matthewfitz@gmail.com>
@@ -101,7 +102,18 @@ class MySQLDeleteByColumnInsertIntoLoader extends MySQLReplaceIntoLoader
 
             }
 
-            throw new LoadException($e->getMessage());
+            $query = $delete->queryString;
+            if ($delete instanceof PDOStatement) {
+                $query = $delete->getDebugQuery();
+            }
+
+            $message = sprintf(
+                "Error: %s Query: %s",
+                $e->getMessage(),
+                $query
+            );
+
+            throw new LoadException($message);
         }
 
         $this->connection->beginTransaction();
@@ -117,7 +129,18 @@ class MySQLDeleteByColumnInsertIntoLoader extends MySQLReplaceIntoLoader
 
             }
 
-            throw new LoadException($e->getMessage());
+            $query = $insert->queryString;
+            if ($insert instanceof PDOStatement) {
+                $query = $insert->getDebugQuery();
+            }
+
+            $message = sprintf(
+                "Error: %s Query: %s",
+                $e->getMessage(),
+                $query
+            );
+
+            throw new LoadException($message);
         }
 
         $dataContext->setLoadedCount($loadedCount);
