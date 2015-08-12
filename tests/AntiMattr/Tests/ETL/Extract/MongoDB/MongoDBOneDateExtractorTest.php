@@ -46,6 +46,10 @@ class MongoDBOneDateExtractorTest extends AntiMattrTestCase
             ->method('sort')
             ->will($this->returnValue($this->cursor));
 
+        $this->cursor->expects($this->once())
+            ->method('timeout')
+            ->will($this->returnValue($this->cursor));
+
         $batchIterator = $this->extractor->getIterator();
     }
 }

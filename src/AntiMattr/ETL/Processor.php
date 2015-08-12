@@ -15,6 +15,7 @@ use AntiMattr\ETL\Event\TaskEvent;
 use AntiMattr\ETL\Event\TransformationEvent;
 use AntiMattr\ETL\Exception\ExtractException;
 use AntiMattr\ETL\Exception\LoadException;
+use AntiMattr\ETL\Exception\LoadNoDataException;
 use AntiMattr\ETL\Exception\TransformException;
 use AntiMattr\ETL\Exception\TransformationContinueException;
 use AntiMattr\ETL\Lock\LockInterface;
@@ -211,6 +212,8 @@ class Processor
 
                 try {
                     $this->eventDispatcher->dispatch($transformationEventName, $transformationEvent);
+                } catch (LoadNoDataException $e) {
+                    $this->logInfo(sprintf("%s.%s %s %s", $this->alias, $taskName, 'LoadNoDataException', $e->getMessage()));
                 } catch (LoadException $e) {
                     $this->logError(sprintf("%s.%s %s %s", $this->alias, $taskName, 'LoadException', $e->getMessage()));
                 }
@@ -223,6 +226,8 @@ class Processor
                 try {
                     $this->eventDispatcher->dispatch($taskEventName, $taskEvent);
                     $this->logInfo(sprintf("%s.%s %s Loaded records affected", $this->alias, $taskName, $dataContext->getLoadedCount()));
+                } catch (LoadNoDataException $e) {
+                    $this->logInfo(sprintf("%s.%s %s %s", $this->alias, $taskName, 'LoadNoDataException', $e->getMessage()));
                 } catch (LoadException $e) {
                     $this->logError(sprintf("%s.%s %s %s", $this->alias, $taskName, 'LoadException', $e->getMessage()));
                 }
@@ -238,6 +243,8 @@ class Processor
         try {
             $this->eventDispatcher->dispatch($taskEventName, $taskEvent);
             $this->logInfo(sprintf("%s.%s %s Loaded records affected", $this->alias, $taskName, $dataContext->getLoadedCount()));
+        } catch (LoadNoDataException $e) {
+            $this->logInfo(sprintf("%s.%s %s %s", $this->alias, $taskName, 'LoadNoDataException', $e->getMessage()));
         } catch (LoadException $e) {
             $this->logError(sprintf("%s.%s %s %s", $this->alias, $taskName, 'LoadException', $e->getMessage()));
         }

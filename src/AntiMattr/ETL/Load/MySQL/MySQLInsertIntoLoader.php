@@ -12,6 +12,7 @@
 namespace AntiMattr\ETL\Load\MySQL;
 
 use AntiMattr\ETL\Exception\LoadException;
+use AntiMattr\ETL\Exception\LoadNoDataException;
 use AntiMattr\ETL\Load\LoaderInterface;
 use AntiMattr\ETL\Load\LoaderTrait;
 use AntiMattr\ETL\Load\PDO\PDOStatement;
@@ -43,7 +44,7 @@ class MySQLInsertIntoLoader implements LoaderInterface
     public function load(array $transformed = [])
     {
         if (empty($transformed)) {
-            throw new LoadException("Error - No data to load");
+            throw new LoadNoDataException("Error - No data to load");
         }
 
         $dataContext = $this->task->getDataContext();
