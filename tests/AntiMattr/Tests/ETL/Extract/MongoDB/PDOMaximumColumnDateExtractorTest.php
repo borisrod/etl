@@ -29,7 +29,7 @@ class PDOMaximumColumnDateExtractorTest extends AntiMattrTestCase
         $this->field = 'bar';
         $this->statement = $this->getMock('AntiMattr\Tests\ETL\MockPDOStatement');
         $this->table = 'my_table';
-        $this->extractor = new PDOMaximumColumnDateExtractor(
+        $this->extractor = new PDOMaximumColumnDateExtractorStub(
             $this->db,
             $this->collectionName,
             $this->field,
@@ -68,5 +68,36 @@ class PDOMaximumColumnDateExtractorTest extends AntiMattrTestCase
             ->will($this->returnValue($this->cursor));
 
         $batchIterator = $this->extractor->getIterator();
+    }
+
+    public function testGetMinimumValue()
+    {
+        $result = new \stdClass();
+        $result->minimum = '2015-08-20 22:03:49';
+        $this->extractor->setTimezone('EDT');
+
+        $statement = $this->getMock('PDOStatement');
+
+        $statement->expects($this->once())
+            ->method('fetchObject')
+            ->will($this->returnValue($result));
+
+        $minDate = $this->extractor->doGetMinimumValue($statement);
+        $maxDate = $this->extractor->doGetMaximumValue($statement);
+
+        $this->assertGreaterThan($minDate, $maxDate);
+    }
+}
+
+class PDOMaximumColumnDateExtractorStub extends PDOMaximumColumnDateExtractor
+{
+    public function doGetMinimumValue(\PDOStatement $statement)
+    {
+        return $this->getMinimumValue($statement);
+    }
+
+    public function doGetMaximumValue(\PDOStatement $statement)
+    {
+        return $this->getMaximumValue($statement);
     }
 }
