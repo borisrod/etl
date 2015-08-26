@@ -72,14 +72,45 @@ class MySQLDeleteByColumnInsertIntoLoader extends MySQLReplaceIntoLoader
 
         $foreignKeys = array_unique($foreignKeys);
 
-        $deleteSql = sprintf(
-            "DELETE FROM %s WHERE %s IN(%s);",
-            $this->table,
-            $this->column,
-            implode(',', array_map(function($id){
-                return sprintf("'%s'", $id);
-            }, $foreignKeys))
-        );
+        $loadedCount = 0;
+
+        if (count($foreignKeys) > 0) {
+            $deleteSql = sprintf(
+                "DELETE FROM %s WHERE %s IN(%s);",
+                $this->table,
+                $this->column,
+                implode(',', array_map(function($id){
+                    return sprintf("'%s'", $id);
+                }, $foreignKeys))
+            );
+
+            $this->connection->beginTransaction();
+            try {
+                $delete = $this->connection->prepare($deleteSql);
+                $delete->execute();
+                $this->connection->commit();
+                $loadedCount += $delete->rowCount();
+            } catch (\PDOException $e){
+                try {
+                    $this->connection->rollBack();
+                } catch (\Exception $rollback) {
+
+                }
+
+                $query = $delete->queryString;
+                if ($delete instanceof PDOStatement) {
+                    $query = $delete->getDebugQuery();
+                }
+
+                $message = sprintf(
+                    "Error: %s Query: %s",
+                    $e->getMessage(),
+                    $query
+                );
+
+                throw new LoadException($message);
+            }
+        }
 
         $insertSql = sprintf(
             "INSERT INTO %s (%s) VALUES %s;",
@@ -87,35 +118,6 @@ class MySQLDeleteByColumnInsertIntoLoader extends MySQLReplaceIntoLoader
             $columns,
             implode(',', $valuePlaceholders)
         );
-
-        $loadedCount = 0;
-
-        $this->connection->beginTransaction();
-        try {
-            $delete = $this->connection->prepare($deleteSql);
-            $delete->execute();
-            $this->connection->commit();
-            $loadedCount += $delete->rowCount();
-        } catch (\PDOException $e){
-            try {
-                $this->connection->rollBack();
-            } catch (\Exception $rollback) {
-
-            }
-
-            $query = $delete->queryString;
-            if ($delete instanceof PDOStatement) {
-                $query = $delete->getDebugQuery();
-            }
-
-            $message = sprintf(
-                "Error: %s Query: %s",
-                $e->getMessage(),
-                $query
-            );
-
-            throw new LoadException($message);
-        }
 
         $this->connection->beginTransaction();
         try {
