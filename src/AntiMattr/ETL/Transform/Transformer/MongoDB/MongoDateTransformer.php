@@ -37,7 +37,9 @@ class MongoDateTransformer implements TransformerInterface
         }
 
         $date = new \DateTime();
-        $date->setTimestamp($value->sec);
+        if ($value instanceof \MongoDate) {
+            $date->setTimestamp($value->sec);
+        }
 
         if (isset($this->options['timezone'])) {
             $date->setTimezone(new \DateTimeZone($this->options['timezone']));
