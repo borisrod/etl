@@ -53,7 +53,7 @@ class MongoDBEmbedManyBatchIterator extends BatchIterator
     public function current()
     {
         $current = $this->innerIterator->current();
-        if (!isset($current[$this->embedManyField])) {
+        if (false === $this->hasEmbeddedProperty($current)) {
             $this->batchSize = null;
             $this->count = 0;
             if ($this->innerIterator->hasNext()) {
@@ -63,7 +63,7 @@ class MongoDBEmbedManyBatchIterator extends BatchIterator
             return [];
         }
 
-        $embed = array_values($current[$this->embedManyField]);
+        $embed = array_values($this->getEmbeddedProperty($current));
         if (!isset($embed[$this->count])) {
             $this->batchSize = null;
             $this->count = 0;
@@ -89,13 +89,13 @@ class MongoDBEmbedManyBatchIterator extends BatchIterator
         $this->key++;
 
         $current = $this->innerIterator->current();
-        if (!isset($current[$this->embedManyField])) {
+        if (false === $this->hasEmbeddedProperty($current)) {
             $this->count = 0;
             $this->innerIterator->next();
             return;
         }
 
-        $embed = array_values($current[$this->embedManyField]);
+        $embed = array_values($this->getEmbeddedProperty($current));
         $size = count($embed);
 
         if ($this->count < $size) {
@@ -130,5 +130,53 @@ class MongoDBEmbedManyBatchIterator extends BatchIterator
         $this->count = 0;
         $this->key = 0;
         $this->innerIterator->rewind();
+    }
+
+    /**
+     * @param array $current
+     *
+     * @return Boolean
+     */
+    protected function hasEmbeddedProperty(array $current = [])
+    {
+        if (false === strpos($this->embedManyField, '.')) {
+            return isset($current[$this->embedManyField]);
+        }
+
+        $pieces = explode('.', $this->embedManyField);
+
+        $chain = $current;
+        foreach ($pieces as $piece) {
+            if (!isset($chain[$piece])) {
+                return false;
+            }
+            $chain = $chain[$piece];
+        }
+
+        return true;
+    }
+
+    /**
+     * @param array $current
+     *
+     * @return mixed
+     */
+    protected function getEmbeddedProperty(array $current = [])
+    {
+        if (false === strpos($this->embedManyField, '.')) {
+            return $current[$this->embedManyField];
+        }
+
+        $pieces = explode('.', $this->embedManyField);
+
+        $chain = $current;
+        foreach ($pieces as $piece) {
+            if (!isset($chain[$piece])) {
+                return;
+            }
+            $chain = $chain[$piece];
+        }
+
+        return $chain;
     }
 }

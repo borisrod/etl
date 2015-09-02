@@ -107,4 +107,67 @@ class MongoDBEmbedManyBatchIteratorTest extends AntiMattrTestCase
 
         return new \ArrayIterator($array);
     }
+
+    public function testHasGetEmbeddedProperty()
+    {
+        $batchIterator = new MongoDBEmbedManyBatchIteratorStub('cart');
+        $record1 = [
+            'not_the_embed_property' => 'foo',
+        ];
+        $this->assertFalse($batchIterator->doHasEmbeddedProperty($record1));
+
+        $record2 = [
+            'cart' => 'foo',
+        ];
+        $this->assertTrue($batchIterator->doHasEmbeddedProperty($record2));
+
+        $record3 = [
+            'cart' => [
+                'quoteItems' => 'foo',
+            ],
+        ];
+        $this->assertTrue($batchIterator->doHasEmbeddedProperty($record3));
+
+        $batchIterator2 = new MongoDBEmbedManyBatchIteratorStub('cart.not_this_one');
+        $record4 = [
+            'cart' => [
+                'quoteItems' => 'foo',
+            ],
+        ];
+        $this->assertFalse($batchIterator2->doHasEmbeddedProperty($record4));
+
+        $batchIterator3 = new MongoDBEmbedManyBatchIteratorStub('cart.quoteItems');
+        $record5 = [
+            'cart' => [
+                'quoteItems' => 'foo',
+            ],
+        ];
+        $this->assertTrue($batchIterator3->doHasEmbeddedProperty($record5));
+        $this->assertEquals('foo', $batchIterator3->doGetEmbeddedProperty($record5));
+
+        $batchIterator4 = new MongoDBEmbedManyBatchIteratorStub('cart.quoteItems.otherItems');
+        $this->assertFalse($batchIterator4->doHasEmbeddedProperty($record5));
+
+        $record6 = [
+            'cart' => [
+                'quoteItems' => [
+                    'otherItems' => 'foo',
+                ]
+            ],
+        ];
+        $this->assertTrue($batchIterator4->doHasEmbeddedProperty($record6));
+    }
+}
+
+class MongoDBEmbedManyBatchIteratorStub extends MongoDBEmbedManyBatchIterator
+{
+    public function doHasEmbeddedProperty(array $current = [])
+    {
+        return $this->hasEmbeddedProperty($current);
+    }
+
+    public function doGetEmbeddedProperty(array $current = [])
+    {
+        return $this->getEmbeddedProperty($current);
+    }
 }
