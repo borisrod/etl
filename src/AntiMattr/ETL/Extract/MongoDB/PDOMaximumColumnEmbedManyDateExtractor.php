@@ -38,16 +38,16 @@ class PDOMaximumColumnEmbedManyDateExtractor extends PDOMaximumColumnEmbedManyEx
     {
         $result = $statement->fetchObject();
         if (!isset($result) || !isset($result->minimum)) {
-            return new \MongoDate(strtotime($this->defaultValue));
+            $date = new \DateTime($this->defaultValue);
+        } else {
+            $date = new \DateTime($result->minimum);
         }
 
         if ($this->timezone) {
-            $date = $result->minimum . ' ' . $this->timezone;
-        } else {
-            $date = $result->minimum;
+            $date->setTimezone(new \DateTimeZone($this->timezone));
         }
 
-        return new \MongoDate(strtotime($date));
+        return new \MongoDate($date->getTimestamp());
     }
 
     /**
