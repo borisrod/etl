@@ -74,7 +74,7 @@ class PDOMaximumColumnDateExtractorTest extends AntiMattrTestCase
     {
         $result = new \stdClass();
         $result->minimum = '2015-08-20 22:03:49';
-        $this->extractor->setTimezone('EDT');
+        $this->extractor->setTimezone('America/New_York');
 
         $statement = $this->getMock('PDOStatement');
 
@@ -83,9 +83,14 @@ class PDOMaximumColumnDateExtractorTest extends AntiMattrTestCase
             ->will($this->returnValue($result));
 
         $minDate = $this->extractor->doGetMinimumValue($statement);
-        $maxDate = $this->extractor->doGetMaximumValue($statement);
 
-        $this->assertGreaterThan($minDate, $maxDate);
+        $this->assertEquals('1440122629', $minDate->sec);
+
+        $otherDate = new \DateTime();
+        $otherDate->setTimezone(new \DateTimeZone('America/Chicago'));
+        $otherDate->setTimestamp($minDate->sec);
+
+        $this->assertEquals('2015-08-20 21:03:49', $otherDate->format('Y-m-d H:i:s'));
     }
 }
 
