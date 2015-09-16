@@ -75,6 +75,10 @@ trait TransformationTrait
             $this->defaultValue = $configuration['defaultValue'];
         }
 
+        if (isset($configuration['listener'])) {
+            $this->setListener($configuration['listener']);
+        }
+
         if (!isset($configuration['transformers']) || empty($configuration['transformers'])) {
             $object = new $this->defaultTransformerClass();
             $this->addTransformer($object);

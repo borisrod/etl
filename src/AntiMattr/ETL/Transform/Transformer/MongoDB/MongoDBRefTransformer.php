@@ -46,10 +46,11 @@ class MongoDBRefTransformer implements TransformerInterface
         }
 
         $type = true === is_object($value) ? get_class($value) : gettype($value);
+        $valueString = is_array($value) ? implode(',', $value) : (string) $value;
 
         $message = sprintf(
             "MongoDBRefTransformer: Value % is of type %s and cannot be transformed",
-            (string) $value,
+            $valueString,
             $type
         );
         throw new TransformException($message);
