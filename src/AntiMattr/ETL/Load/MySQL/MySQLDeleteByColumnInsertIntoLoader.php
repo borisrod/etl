@@ -66,6 +66,10 @@ class MySQLDeleteByColumnInsertIntoLoader extends MySQLReplaceIntoLoader
             $values = array_merge($values, array_values($value));
         }
 
+        if (empty($values)) {
+            throw new LoadNoDataException("Error - No data to load");
+        }
+
         $foreignKeys = array_unique($foreignKeys);
 
         $loadedCount = 0;
