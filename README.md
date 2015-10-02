@@ -29,17 +29,171 @@ If everything worked, the ETL can now be found at vendor/antimattr/etl.
 Overview
 ========
 
-The execution flow of the processor is:
+Each Task should implement an ExtractorInterface, TransformationInterface, LoaderInterface
 
-```text
-Processor::executeTask
-  => foreach iterator
-    => foreach transformations
-      => foreach transformer
-        => transform
-          => bind
-    => load a completed batch
-  => load remaining data
+Example:
+
+```yaml
+services:
+  # Extractors
+  antimattr.etl_extractor.supplier_billing_address_max_updated_at:
+    class: AntiMattr\ETL\Extract\MongoDB\PDOMaximumColumnDateExtractor
+    lazy: true
+    public: false
+    arguments:
+      - @antimattr.etl_mongodb_database # Data Extract
+      - 'suppliers' # Collection Name
+      - 'updatedAt' # Max MongoDB Property
+      - @antimattr.etl_mysql_connection # Data Load
+      - 'supplier_address' # Table Name
+      - 'updatedAt' # Max MySQL Property
+      - "WHERE addressType='billingAddress'" # Optional WHERE condition
+      - '2000-01-01 EDT' # Optional Default Max MySQL Value
+      - { '_id': 1, 'billingAddress': 1 } # Projection
+      - { 'updatedAt': -1 } # Sort
+      - 500 # Batch
+    calls:
+      - [ 'setTimezone', [ 'America/New_York' ] ]
+
+  # Loaders
+  antimattr.etl_loader.supplier_billing_address:
+    class: AntiMattr\ETL\Load\MySQL\MySQLReplaceIntoLoader
+    lazy: true
+    public: false
+    arguments: [ @antimattr.etl_mysql_connection, 'supplier_address' ]
+
+  # Tasks
+  antimattr.etl_task.supplier_billing_address:
+    class: "%antimattr.etl_task_common.class%"
+    lazy: true
+    calls:
+      - [ 'setExtractor', [ @antimattr.etl_extractor.supplier_billing_address_max_updated_at ] ]
+      - [ 'setLoader', [ @antimattr.etl_loader.supplier_billing_address ] ]
+    properties:
+      configuration:
+        -
+          field: '_id'
+          name: 'supplierId'
+          transformers:
+            - @antimattr.etl_transformer.mongodb.mongoid
+        -
+          field: '_id'
+          name: 'addressType'
+          transformers:
+            -
+              class: AntiMattr\ETL\Transform\Transformer\NotNull\NotNullToDefaultTransformer
+              properties:
+                options: { 'default': 'billingAddress' }
+        -
+          field: 'billingAddress'
+          name: 'name'
+          transformers:
+            -
+              class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoEmbedOneTransformer
+              properties:
+                options: { 'field': 'name' }
+            - @antimattr.etl_transformer.scalar.html_utf8
+            -
+              class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
+              properties:
+                options: { 'maxlength': 255 }
+        -
+          field: 'billingAddress'
+          name: 'address1'
+          transformers:
+            -
+              class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoEmbedOneTransformer
+              properties:
+                options: { 'field': 'address1' }
+            - @antimattr.etl_transformer.scalar.html_utf8
+            -
+              class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
+              properties:
+                options: { 'maxlength': 255 }
+        -
+          field: 'billingAddress'
+          name: 'address2'
+          transformers:
+            -
+              class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoEmbedOneTransformer
+              properties:
+                options: { 'field': 'address2' }
+            - @antimattr.etl_transformer.scalar.html_utf8
+            -
+              class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
+              properties:
+                options: { 'maxlength': 255 }
+        -
+          field: 'billingAddress'
+          name: 'city'
+          transformers:
+            -
+              class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoEmbedOneTransformer
+              properties:
+                options: { 'field': 'city' }
+            - @antimattr.etl_transformer.scalar.html_utf8
+            -
+              class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
+              properties:
+                options: { 'maxlength': 255 }
+        -
+          field: 'billingAddress'
+          name: 'state'
+          transformers:
+            -
+              class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoEmbedOneTransformer
+              properties:
+                options: { 'field': 'state' }
+            - @antimattr.etl_transformer.scalar.html_utf8
+            -
+              class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
+              properties:
+                options: { 'maxlength': 255 }
+        -
+          field: 'billingAddress'
+          name: 'state'
+          transformers:
+            -
+              class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoEmbedOneTransformer
+              properties:
+                options: { 'field': 'state' }
+            - @antimattr.etl_transformer.scalar.html_utf8
+            -
+              class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
+              properties:
+                options: { 'maxlength': 50 }
+        -
+          field: 'billingAddress'
+          name: 'zip'
+          transformers:
+            -
+              class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoEmbedOneTransformer
+              properties:
+                options: { 'field': 'zip' }
+            - @antimattr.etl_transformer.scalar.html_utf8
+            -
+              class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
+              properties:
+                options: { 'maxlength': 20 }
+        -
+          field: 'billingAddress'
+          name: 'phone'
+          transformers:
+            -
+              class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoEmbedOneTransformer
+              properties:
+                options: { 'field': 'phone' }
+            - { class: OpenSky\ETL\Transform\Transformer\MongoDB\PhoneTransformer }
+            - @antimattr.etl_transformer.scalar.html_utf8
+            -
+              class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
+              properties:
+                options: { 'maxlength': 30 }
+        -
+          field: '_id'
+          name: 'updatedAt'
+          transformers:
+            - @antimattr.etl_transformer.notnull.notnull_date
 ```
 
 Features
