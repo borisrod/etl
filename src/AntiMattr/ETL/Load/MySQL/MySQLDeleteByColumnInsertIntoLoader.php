@@ -41,16 +41,20 @@ class MySQLDeleteByColumnInsertIntoLoader extends MySQLReplaceIntoLoader
             throw new LoadNoDataException("Error - No data to load");
         }
 
-        $dataContext = $this->task->getDataContext();
-
-        $firstRow = array_slice($transformed, 0, 1);
-        $first = array_shift($firstRow);
-        $properties = array_keys($first);
-        $columns = implode(', ', $properties);
-
-        $valuePlaceholders = [];
-        $values = [];
         $foreignKeys = [];
+        $properties = [];
+        $values = [];
+
+        $transformations = $this->task->getTransformations();
+
+        foreach ($transformations as $transformation) {
+            $properties[$transformation->name] = null;
+        }
+
+        $columns = implode(', ', array_keys($properties));
+        $questionMarks = array_fill(0, count($properties), '?');
+        $valuePlaceholders = array_fill(0, count($transformed), '(' . implode(',', $questionMarks) . ')');
+
         foreach ($transformed as $row) {
             if (!isset($row[$this->column])) {
                 continue;
@@ -58,16 +62,8 @@ class MySQLDeleteByColumnInsertIntoLoader extends MySQLReplaceIntoLoader
 
             $foreignKeys[] = $row[$this->column];
 
-            $result = [];
-            $count = sizeof($row);
-            if ($count > 0) {
-                $values = array_merge($values, array_values($row));
-                for($x = 0; $x < $count; $x++){
-                    $result[] = '?';
-                }
-            }
-
-            $valuePlaceholders[] = '(' . implode(',', $result) . ')';
+            $value = array_merge($properties, $row);
+            $values = array_merge($values, array_values($value));
         }
 
         $foreignKeys = array_unique($foreignKeys);
@@ -146,6 +142,7 @@ class MySQLDeleteByColumnInsertIntoLoader extends MySQLReplaceIntoLoader
             throw new LoadException($message);
         }
 
+        $dataContext = $this->task->getDataContext();
         $dataContext->setLoadedCount($loadedCount);
     }
 }
