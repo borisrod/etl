@@ -5,10 +5,10 @@ services:
     lazy: true
     public: false
     arguments:
-      - @antimattr.etl_mongodb_database
+      - '@antimattr.etl_mongodb_database'
       - 'coupon_codes'
       - '_id'
-      - @antimattr.etl_mysql_connection
+      - '@antimattr.etl_mysql_connection'
       - 'coupon_codes'
       - 'id'
       - ~
@@ -22,35 +22,35 @@ services:
     class: AntiMattr\ETL\Load\MySQL\MySQLReplaceIntoLoader
     lazy: true
     public: false
-    arguments: [ @antimattr.etl_mysql_connection, 'coupon_codes' ]
+    arguments: [ '@antimattr.etl_mysql_connection', 'coupon_codes' ]
 
   # Tasks
   antimattr.etl_task.coupon_codes:
     class: "%antimattr.etl_task_common.class%"
     lazy: true
     calls:
-      - [ 'setExtractor', [ @antimattr.etl_extractor.coupon_codes_max_id ] ]
-      - [ 'setLoader', [ @antimattr.etl_loader.coupon_codes ] ]
+      - [ 'setExtractor', [ '@antimattr.etl_extractor.coupon_codes_max_id' ] ]
+      - [ 'setLoader', [ '@antimattr.etl_loader.coupon_codes' ] ]
     properties:
       configuration:
         -
           field: '_id'
           name: 'id'
           transformers:
-            - @antimattr.etl_transformer.mongodb.mongoid
+            - '@antimattr.etl_transformer.mongodb.mongoid'
         -
           field: 'seller'
           name: 'sellerId'
           transformers:
-            - @antimattr.etl_transformer.mongodb.mongodbref
+            - '@antimattr.etl_transformer.mongodb.mongodbref'
         -
           field: 'active'
           transformers:
-            - @antimattr.etl_transformer.mongodb.mongoboolean
+            - '@antimattr.etl_transformer.mongodb.mongoboolean'
         -
           field: 'code'
           transformers:
-            - @antimattr.etl_transformer.scalar.html_utf8
+            - '@antimattr.etl_transformer.scalar.html_utf8'
             -
               class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
               properties:
@@ -59,7 +59,7 @@ services:
         -
           field: 'freeShipping'
           transformers:
-            - @antimattr.etl_transformer.mongodb.mongoboolean
+            - '@antimattr.etl_transformer.mongodb.mongoboolean'
         - { field: 'perUserMax' }
         - { field: 'maxUses' }
         - { field: 'numUses' }
@@ -67,4 +67,4 @@ services:
           field: '_id'
           name: 'createdAt'
           transformers:
-            - @antimattr.etl_transformer.mongodb.mongoid_date
+            - '@antimattr.etl_transformer.mongodb.mongoid_date'

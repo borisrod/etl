@@ -5,10 +5,10 @@ services:
     lazy: true
     public: false
     arguments:
-      - @antimattr.etl_mongodb_database
+      - '@antimattr.etl_mongodb_database'
       - 'merchants'
       - '_id'
-      - @antimattr.etl_mysql_connection
+      - '@antimattr.etl_mysql_connection'
       - 'merchants'
       - 'id'
       - ~
@@ -22,29 +22,29 @@ services:
     class: AntiMattr\ETL\Load\MySQL\MySQLReplaceIntoLoader
     lazy: true
     public: false
-    arguments: [ @antimattr.etl_mysql_connection, 'merchants' ]
+    arguments: [ '@antimattr.etl_mysql_connection', 'merchants' ]
 
   # Tasks
   antimattr.etl_task.merchants:
     class: "%antimattr.etl_task_common.class%"
     lazy: true
     calls:
-      - [ 'setExtractor', [ @antimattr.etl_extractor.merchants_max_id ] ]
-      - [ 'setLoader', [ @antimattr.etl_loader.merchants ] ]
+      - [ 'setExtractor', [ '@antimattr.etl_extractor.merchants_max_id' ] ]
+      - [ 'setLoader', [ '@antimattr.etl_loader.merchants' ] ]
     properties:
       configuration:
         -
           field: '_id'
           name: 'id'
           transformers:
-            - @antimattr.etl_transformer.mongodb.mongoid
+            - '@antimattr.etl_transformer.mongodb.mongoid'
         -
           field: 'sl'
           name: 'sellerId'
           transformers:
-            - @antimattr.etl_transformer.mongodb.mongoid
+            - '@antimattr.etl_transformer.mongodb.mongoid'
         -
           field: 'sp'
           name: 'supplierId'
           transformers:
-            - @antimattr.etl_transformer.mongodb.mongoid
+            - '@antimattr.etl_transformer.mongodb.mongoid'

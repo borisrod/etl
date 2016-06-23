@@ -5,10 +5,10 @@ services:
     lazy: true
     public: false
     arguments:
-      - @antimattr.etl_mongodb_database
+      - '@antimattr.etl_mongodb_database'
       - 'AdminUser'
       - '_id'
-      - @antimattr.etl_mysql_connection
+      - '@antimattr.etl_mysql_connection'
       - 'admin_users'
       - 'id'
       - ~
@@ -22,22 +22,22 @@ services:
     class: AntiMattr\ETL\Load\MySQL\MySQLReplaceIntoLoader
     lazy: true
     public: false
-    arguments: [ @antimattr.etl_mysql_connection, 'admin_users' ]
+    arguments: [ '@antimattr.etl_mysql_connection', 'admin_users' ]
 
   # Tasks
   antimattr.etl_task.admin_users:
     class: "%antimattr.etl_task_common.class%"
     lazy: true
     calls:
-      - [ 'setExtractor', [ @antimattr.etl_extractor.admin_users_max_id ] ]
-      - [ 'setLoader', [ @antimattr.etl_loader.admin_users ] ]
+      - [ 'setExtractor', [ '@antimattr.etl_extractor.admin_users_max_id' ] ]
+      - [ 'setLoader', [ '@antimattr.etl_loader.admin_users' ] ]
     properties:
       configuration:
         -
           field: '_id'
           name: 'id'
           transformers:
-            - @antimattr.etl_transformer.mongodb.mongoid
+            - '@antimattr.etl_transformer.mongodb.mongoid'
         -
           field: 'ldapUsername'
           transformers:

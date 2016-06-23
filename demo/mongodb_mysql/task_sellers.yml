@@ -5,10 +5,10 @@ services:
     lazy: true
     public: false
     arguments:
-      - @antimattr.etl_mongodb_database
+      - '@antimattr.etl_mongodb_database'
       - 'sellers'
       - 'updatedAt'
-      - @antimattr.etl_mysql_connection
+      - '@antimattr.etl_mysql_connection'
       - 'sellers'
       - 'updatedAt'
       - ~
@@ -24,26 +24,26 @@ services:
     class: AntiMattr\ETL\Load\MySQL\MySQLReplaceIntoLoader
     lazy: true
     public: false
-    arguments: [ @antimattr.etl_mysql_connection, 'sellers' ]
+    arguments: [ '@antimattr.etl_mysql_connection', 'sellers' ]
 
   # Tasks
   antimattr.etl_task.sellers:
     class: "%antimattr.etl_task_common.class%"
     lazy: true
     calls:
-      - [ 'setExtractor', [ @antimattr.etl_extractor.sellers_max_updated_at ] ]
-      - [ 'setLoader', [ @antimattr.etl_loader.sellers ] ]
+      - [ 'setExtractor', [ '@antimattr.etl_extractor.sellers_max_updated_at' ] ]
+      - [ 'setLoader', [ '@antimattr.etl_loader.sellers' ] ]
     properties:
       configuration:
         -
           field: '_id'
           name: 'id'
           transformers:
-            - @antimattr.etl_transformer.mongodb.mongoid
+            - '@antimattr.etl_transformer.mongodb.mongoid'
         -
           field: 'firstName'
           transformers:
-            - @antimattr.etl_transformer.scalar.html_utf8
+            - '@antimattr.etl_transformer.scalar.html_utf8'
             -
               class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
               properties:
@@ -51,7 +51,7 @@ services:
         -
           field: 'lastName'
           transformers:
-            - @antimattr.etl_transformer.scalar.html_utf8
+            - '@antimattr.etl_transformer.scalar.html_utf8'
             -
               class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
               properties:
@@ -59,7 +59,7 @@ services:
         -
           field: 'slug'
           transformers:
-            - @antimattr.etl_transformer.scalar.html_utf8
+            - '@antimattr.etl_transformer.scalar.html_utf8'
             -
               class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
               properties:
@@ -68,37 +68,37 @@ services:
         -
           field: 'deletedAt'
           transformers:
-            - @antimattr.etl_transformer.mongodb.mongodate
+            - '@antimattr.etl_transformer.mongodb.mongodate'
         -
           field: 'createdAt'
           transformers:
-            - @antimattr.etl_transformer.mongodb.mongodate
+            - '@antimattr.etl_transformer.mongodb.mongodate'
         -
           field: 'updatedAt'
           transformers:
-            - @antimattr.etl_transformer.mongodb.mongodate
+            - '@antimattr.etl_transformer.mongodb.mongodate'
         -
           field: 'primaryCategory'
           transformers:
-            - @antimattr.etl_transformer.mongodb.mongodbref
+            - '@antimattr.etl_transformer.mongodb.mongodbref'
         - { field: 'numPageViews' }
         -
           field: 'primaryUser'
           name: 'primaryUserId'
           transformers:
-            - @antimattr.etl_transformer.mongodb.mongodbref
+            - '@antimattr.etl_transformer.mongodb.mongodbref'
         -
           field: 'mrch'
           name: 'merchantId'
           transformers:
-            - @antimattr.etl_transformer.mongodb.mongodbref
+            - '@antimattr.etl_transformer.mongodb.mongodbref'
         -
           field: 'tp'
           name: 'type'
         -
           field: 'credentials'
           transformers:
-            - @antimattr.etl_transformer.scalar.html_utf8
+            - '@antimattr.etl_transformer.scalar.html_utf8'
             -
               class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
               properties:
@@ -110,7 +110,7 @@ services:
         -
           field: 'primaryTaxon'
           transformers:
-            - @antimattr.etl_transformer.mongodb.mongodbref
+            - '@antimattr.etl_transformer.mongodb.mongodbref'
         - { field: 'netConns' }
         -
           field: 'companySize'
@@ -120,7 +120,7 @@ services:
         -
           field: 'fsuntil'
           transformers:
-            - @antimattr.etl_transformer.mongodb.mongodate
+            - '@antimattr.etl_transformer.mongodb.mongodate'
         -
           field: 'holidayReturns'
           name: 'holidayreturns'
@@ -128,12 +128,12 @@ services:
           field: 'coPilotActiveDateStart'
           name: 'copilotStartDate'
           transformers:
-            - @antimattr.etl_transformer.mongodb.mongodate
+            - '@antimattr.etl_transformer.mongodb.mongodate'
         -
           field: 'coPilotActiveDateEnd'
           name: 'copilotEndDate'
           transformers:
-            - @antimattr.etl_transformer.mongodb.mongodate
+            - '@antimattr.etl_transformer.mongodb.mongodate'
         - { field: 'promotable' }
         - { field: 'coPilotReplenishmentAmount' }
         - { field: 'disc' }
@@ -153,7 +153,7 @@ services:
               class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoEmbedOneTransformer
               properties:
                 options: { 'field': 'expectedGoLiveDate' }
-            - @antimattr.etl_transformer.mongodb.mongodate
+            - '@antimattr.etl_transformer.mongodb.mongodate'
         -
           field: 'brand'
           name: 'logo'
@@ -162,7 +162,7 @@ services:
               class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoEmbedOneTransformer
               properties:
                 options: { 'field': 'logo' }
-            - @antimattr.etl_transformer.mongodb.mongoboolean
+            - '@antimattr.etl_transformer.mongodb.mongoboolean'
         -
           field: 'tm'
           name: 'twitterMarketplaceId'
@@ -179,4 +179,4 @@ services:
               class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoEmbedOneTransformer
               properties:
                 options: { 'field': 'state' }
-            - @antimattr.etl_transformer.mongodb.mongoboolean
+            - '@antimattr.etl_transformer.mongodb.mongoboolean'

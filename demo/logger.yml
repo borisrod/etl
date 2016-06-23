@@ -9,4 +9,4 @@ services:
     lazy: true
     arguments: [ 'mongodb_mysql' ]
     calls:
-      - [ 'pushHandler', [ @stream_handler_mongodb_mysql ] ]
+      - [ 'pushHandler', [ '@stream_handler_mongodb_mysql' ] ]

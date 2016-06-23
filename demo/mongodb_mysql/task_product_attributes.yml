@@ -5,10 +5,10 @@ services:
     lazy: true
     public: false
     arguments:
-      - @antimattr.etl_mongodb_database
+      - '@antimattr.etl_mongodb_database'
       - 'products'
       - 'updatedAt'
-      - @antimattr.etl_mysql_connection
+      - '@antimattr.etl_mysql_connection'
       - 'product_attributes'
       - 'updatedAt'
       - ~
@@ -25,22 +25,22 @@ services:
     class: AntiMattr\ETL\Load\MySQL\MySQLDeleteByColumnInsertIntoLoader
     lazy: true
     public: false
-    arguments: [ @antimattr.etl_mysql_connection, 'product_attributes', 'productId' ]
+    arguments: [ '@antimattr.etl_mysql_connection', 'product_attributes', 'productId' ]
 
   # Tasks
   antimattr.etl_task.product_attributes:
     class: "%antimattr.etl_task_common.class%"
     lazy: true
     calls:
-      - [ 'setExtractor', [ @antimattr.etl_extractor.product_attributes_max_updated_at ] ]
-      - [ 'setLoader', [ @antimattr.etl_loader.product_attributes ] ]
+      - [ 'setExtractor', [ '@antimattr.etl_extractor.product_attributes_max_updated_at' ] ]
+      - [ 'setLoader', [ '@antimattr.etl_loader.product_attributes' ] ]
     properties:
       configuration:
         -
           field: '_id'
           name: 'productId'
           transformers:
-            - @antimattr.etl_transformer.mongodb.mongoid
+            - '@antimattr.etl_transformer.mongodb.mongoid'
         -
           field: 'attributeValues'
           name: 'code'
@@ -49,7 +49,7 @@ services:
               class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoEmbedOneTransformer
               properties:
                 options: { 'field': 'code' }
-            - @antimattr.etl_transformer.scalar.html_utf8
+            - '@antimattr.etl_transformer.scalar.html_utf8'
             -
               class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
               properties:
@@ -62,7 +62,7 @@ services:
               class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoEmbedOneTransformer
               properties:
                 options: { 'field': 'type' }
-            - @antimattr.etl_transformer.scalar.html_utf8
+            - '@antimattr.etl_transformer.scalar.html_utf8'
             -
               class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
               properties:
@@ -75,7 +75,7 @@ services:
               class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoEmbedOneTransformer
               properties:
                 options: { 'field': 'value' }
-            - @antimattr.etl_transformer.scalar.html_utf8
+            - '@antimattr.etl_transformer.scalar.html_utf8'
             -
               class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
               properties:
@@ -84,4 +84,4 @@ services:
           field: '_id'
           name: 'updatedAt'
           transformers:
-            - @antimattr.etl_transformer.notnull.notnull_date
+            - '@antimattr.etl_transformer.notnull.notnull_date'

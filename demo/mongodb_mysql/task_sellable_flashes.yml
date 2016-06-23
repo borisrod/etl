@@ -5,10 +5,10 @@ services:
     lazy: true
     public: false
     arguments:
-      - @antimattr.etl_mongodb_database
+      - '@antimattr.etl_mongodb_database'
       - 'sellables'
       - 'updatedAt'
-      - @antimattr.etl_mysql_connection
+      - '@antimattr.etl_mysql_connection'
       - 'sellables_flashes'
       - 'updatedAt'
       - ~
@@ -27,15 +27,15 @@ services:
     class: AntiMattr\ETL\Load\MySQL\MySQLDeleteByColumnInsertIntoLoader
     lazy: true
     public: false
-    arguments: [ @antimattr.etl_mysql_connection, 'sellables_flashes', 'sellableId' ]
+    arguments: [ '@antimattr.etl_mysql_connection', 'sellables_flashes', 'sellableId' ]
 
   # Tasks
   antimattr.etl_task.sellable_flashes:
     class: "%antimattr.etl_task_common.class%"
     lazy: true
     calls:
-      - [ 'setExtractor', [ @antimattr.etl_extractor.sellable_flashes_max_updated_at ] ]
-      - [ 'setLoader', [ @antimattr.etl_loader.sellable_flashes ] ]
+      - [ 'setExtractor', [ '@antimattr.etl_extractor.sellable_flashes_max_updated_at' ] ]
+      - [ 'setLoader', [ '@antimattr.etl_loader.sellable_flashes' ] ]
     properties:
       configuration:
         -
@@ -46,12 +46,12 @@ services:
               class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoEmbedOneTransformer
               properties:
                 options: { 'field': '_id' }
-            - @antimattr.etl_transformer.mongodb.mongoid
+            - '@antimattr.etl_transformer.mongodb.mongoid'
         -
           field: '_id'
           name: 'sellableId'
           transformers:
-            - @antimattr.etl_transformer.mongodb.mongoid
+            - '@antimattr.etl_transformer.mongodb.mongoid'
         -
           field: 'flashes'
           name: 'startDate'
@@ -60,7 +60,7 @@ services:
               class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoEmbedOneTransformer
               properties:
                 options: { 'field': 'startDate' }
-            - @antimattr.etl_transformer.mongodb.mongodate
+            - '@antimattr.etl_transformer.mongodb.mongodate'
         -
           field: 'flashes'
           name: 'endDate'
@@ -69,7 +69,7 @@ services:
               class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoEmbedOneTransformer
               properties:
                 options: { 'field': 'endDate' }
-            - @antimattr.etl_transformer.mongodb.mongodate
+            - '@antimattr.etl_transformer.mongodb.mongodate'
         -
           field: 'flashes'
           name: 'estimatedItems'
@@ -86,7 +86,7 @@ services:
               class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoEmbedOneTransformer
               properties:
                 options: { 'field': 'freeShipping' }
-            - @antimattr.etl_transformer.scalar.html_utf8
+            - '@antimattr.etl_transformer.scalar.html_utf8'
             -
               class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
               properties:
@@ -107,9 +107,9 @@ services:
               class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoEmbedOneTransformer
               properties:
                 options: { 'field': 'allowCredits' }
-            - @antimattr.etl_transformer.mongodb.mongoboolean
+            - '@antimattr.etl_transformer.mongodb.mongoboolean'
         -
           field: '_id'
           name: 'updatedAt'
           transformers:
-            - @antimattr.etl_transformer.notnull.notnull_date
+            - '@antimattr.etl_transformer.notnull.notnull_date'

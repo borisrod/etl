@@ -5,10 +5,10 @@ services:
     lazy: true
     public: false
     arguments:
-      - @antimattr.etl_mongodb_database
+      - '@antimattr.etl_mongodb_database'
       - 'identities'
       - 'updatedAt'
-      - @antimattr.etl_mysql_connection
+      - '@antimattr.etl_mysql_connection'
       - 'seller_follower'
       - 'updatedAt'
       - ~
@@ -27,27 +27,27 @@ services:
     class: AntiMattr\ETL\Load\MySQL\MySQLDeleteByColumnInsertIntoLoader
     lazy: true
     public: false
-    arguments: [ @antimattr.etl_mysql_connection, 'seller_follower', 'userId' ]
+    arguments: [ '@antimattr.etl_mysql_connection', 'seller_follower', 'userId' ]
 
   # Tasks
   antimattr.etl_task.seller_follower:
     class: "%antimattr.etl_task_common.class%"
     lazy: true
     calls:
-      - [ 'setExtractor', [ @antimattr.etl_extractor.seller_follower_max_updated_at ] ]
-      - [ 'setLoader', [ @antimattr.etl_loader.seller_follower ] ]
+      - [ 'setExtractor', [ '@antimattr.etl_extractor.seller_follower_max_updated_at' ] ]
+      - [ 'setLoader', [ '@antimattr.etl_loader.seller_follower' ] ]
     properties:
       configuration:
         -
           field: '_id'
           name: 'userId'
           transformers:
-            - @antimattr.etl_transformer.mongodb.mongoid
+            - '@antimattr.etl_transformer.mongodb.mongoid'
         -
           field: 'sellerSlugs'
           name: 'sellerSlug'
           transformers:
-            - @antimattr.etl_transformer.scalar.html_utf8
+            - '@antimattr.etl_transformer.scalar.html_utf8'
             -
               class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
               properties:
@@ -56,4 +56,4 @@ services:
           field: '_id'
           name: 'updatedAt'
           transformers:
-            - @antimattr.etl_transformer.notnull.notnull_date
+            - '@antimattr.etl_transformer.notnull.notnull_date'

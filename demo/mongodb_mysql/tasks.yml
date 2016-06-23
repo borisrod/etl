@@ -23,19 +23,19 @@ services:
     lazy: true
     arguments:
       -
-        admin_users: @antimattr.etl_task.admin_users
-        categories: @antimattr.etl_task.categories
-        content_blocks: @antimattr.etl_task.content_blocks
-        content_pages: @antimattr.etl_task.content_pages
-        coupon_codes: @antimattr.etl_task.coupon_codes
-        merchants: @antimattr.etl_task.merchants
-        products: @antimattr.etl_task.products
-        product_attributes: @antimattr.etl_task.product_attributes
-        sellables: @antimattr.etl_task.sellables
-        sellable_flashes: @antimattr.etl_task.sellable_flashes
-        sellers: @antimattr.etl_task.sellers
-        seller_follower: @antimattr.etl_task.seller_follower
-        suppliers: @antimattr.etl_task.suppliers
-        supplier_billing_address: @antimattr.etl_task.supplier_billing_address
-        supplier_returns_address: @antimattr.etl_task.supplier_returns_address
-        supplier_shipping_address: @antimattr.etl_task.supplier_shipping_address
+        admin_users: "@antimattr.etl_task.admin_users"
+        categories: "@antimattr.etl_task.categories"
+        content_blocks: "@antimattr.etl_task.content_blocks"
+        content_pages: "@antimattr.etl_task.content_pages"
+        coupon_codes: "@antimattr.etl_task.coupon_codes"
+        merchants: "@antimattr.etl_task.merchants"
+        products: "@antimattr.etl_task.products"
+        product_attributes: "@antimattr.etl_task.product_attributes"
+        sellables: "@antimattr.etl_task.sellables"
+        sellable_flashes: "@antimattr.etl_task.sellable_flashes"
+        sellers: "@antimattr.etl_task.sellers"
+        seller_follower: "@antimattr.etl_task.seller_follower"
+        suppliers: "@antimattr.etl_task.suppliers"
+        supplier_billing_address: "@antimattr.etl_task.supplier_billing_address"
+        supplier_returns_address: "@antimattr.etl_task.supplier_returns_address"
+        supplier_shipping_address: "@antimattr.etl_task.supplier_shipping_address"

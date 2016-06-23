@@ -16,9 +16,9 @@ parameters:
   antimattr.etl_mongodb_connection.server: 'mongodb://localhost:27017'
   antimattr.etl_mongodb_connection.options: []
   antimattr.etl_mongodb_connection.driver_options: []
-  antimattr.etl_mysql_connection.dsn: 'mysql:dbname=jetstream_mongo;host=localhost'
+  antimattr.etl_mysql_connection.dsn: 'mysql:dbname=mongotest;host=localhost'
   antimattr.etl_mysql_connection.username: 'root'
-  antimattr.etl_mysql_connection.password: ~
+  antimattr.etl_mysql_connection.password: 'root'
 
 services:
   # Connections
@@ -34,7 +34,7 @@ services:
     class: MongoDB
     lazy: true
     public: false
-    factory: [ @antimattr.etl_mongodb_connection, 'selectDB' ]
+    factory: [ '@antimattr.etl_mongodb_connection', 'selectDB' ]
     arguments: [ 'opensky_devo' ]
   antimattr.etl_mysql_connection:
     class: PDO
@@ -62,6 +62,6 @@ services:
     class: "%antimattr.etl_processor.class%"
     lazy: true
     factory: [ "%antimattr.etl_processor_factory.class%", 'getProcessor' ]
-    arguments: [ 'mongodb_mysql', @event_dispatcher_mongodb_mysql, @locker_mongodb_mysql, @logger_mongodb_mysql ]
+    arguments: [ 'mongodb_mysql', '@event_dispatcher_mongodb_mysql', '@locker_mongodb_mysql', '@logger_mongodb_mysql' ]
     calls:
-      - [ 'setTasks', [ @antimattr.etl_tasks.mongodb_mysql ] ]
+      - [ 'setTasks', [ '@antimattr.etl_tasks.mongodb_mysql' ] ]

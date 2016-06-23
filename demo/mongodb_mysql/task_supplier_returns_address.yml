@@ -5,10 +5,10 @@ services:
     lazy: true
     public: false
     arguments:
-      - @antimattr.etl_mongodb_database
+      - '@antimattr.etl_mongodb_database'
       - 'suppliers'
       - 'updatedAt'
-      - @antimattr.etl_mysql_connection
+      - '@antimattr.etl_mysql_connection'
       - 'supplier_address'
       - 'updatedAt'
       - "WHERE addressType='returnsAddress'"
@@ -24,22 +24,22 @@ services:
     class: AntiMattr\ETL\Load\MySQL\MySQLReplaceIntoLoader
     lazy: true
     public: false
-    arguments: [ @antimattr.etl_mysql_connection, 'supplier_address' ]
+    arguments: [ '@antimattr.etl_mysql_connection', 'supplier_address' ]
 
   # Tasks
   antimattr.etl_task.supplier_returns_address:
     class: "%antimattr.etl_task_common.class%"
     lazy: true
     calls:
-      - [ 'setExtractor', [ @antimattr.etl_extractor.supplier_returns_address_max_updated_at ] ]
-      - [ 'setLoader', [ @antimattr.etl_loader.supplier_returns_address ] ]
+      - [ 'setExtractor', [ '@antimattr.etl_extractor.supplier_returns_address_max_updated_at' ] ]
+      - [ 'setLoader', [ '@antimattr.etl_loader.supplier_returns_address' ] ]
     properties:
       configuration:
         -
           field: '_id'
           name: 'supplierId'
           transformers:
-            - @antimattr.etl_transformer.mongodb.mongoid
+            - '@antimattr.etl_transformer.mongodb.mongoid'
         -
           field: '_id'
           name: 'addressType'
@@ -56,7 +56,7 @@ services:
               class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoEmbedOneTransformer
               properties:
                 options: { 'field': 'name' }
-            - @antimattr.etl_transformer.scalar.html_utf8
+            - '@antimattr.etl_transformer.scalar.html_utf8'
             -
               class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
               properties:
@@ -69,7 +69,7 @@ services:
               class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoEmbedOneTransformer
               properties:
                 options: { 'field': 'address1' }
-            - @antimattr.etl_transformer.scalar.html_utf8
+            - '@antimattr.etl_transformer.scalar.html_utf8'
             -
               class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
               properties:
@@ -82,7 +82,7 @@ services:
               class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoEmbedOneTransformer
               properties:
                 options: { 'field': 'address2' }
-            - @antimattr.etl_transformer.scalar.html_utf8
+            - '@antimattr.etl_transformer.scalar.html_utf8'
             -
               class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
               properties:
@@ -95,7 +95,7 @@ services:
               class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoEmbedOneTransformer
               properties:
                 options: { 'field': 'city' }
-            - @antimattr.etl_transformer.scalar.html_utf8
+            - '@antimattr.etl_transformer.scalar.html_utf8'
             -
               class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
               properties:
@@ -108,7 +108,7 @@ services:
               class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoEmbedOneTransformer
               properties:
                 options: { 'field': 'state' }
-            - @antimattr.etl_transformer.scalar.html_utf8
+            - '@antimattr.etl_transformer.scalar.html_utf8'
             -
               class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
               properties:
@@ -121,7 +121,7 @@ services:
               class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoEmbedOneTransformer
               properties:
                 options: { 'field': 'state' }
-            - @antimattr.etl_transformer.scalar.html_utf8
+            - '@antimattr.etl_transformer.scalar.html_utf8'
             -
               class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
               properties:
@@ -134,7 +134,7 @@ services:
               class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoEmbedOneTransformer
               properties:
                 options: { 'field': 'zip' }
-            - @antimattr.etl_transformer.scalar.html_utf8
+            - '@antimattr.etl_transformer.scalar.html_utf8'
             -
               class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
               properties:
@@ -151,7 +151,7 @@ services:
               class: AntiMattr\ETL\Transform\Transformer\MongoDB\MongoEmbedOneTransformer
               properties:
                 options: { 'field': 'number' }
-            - @antimattr.etl_transformer.scalar.html_utf8
+            - '@antimattr.etl_transformer.scalar.html_utf8'
             -
               class: AntiMattr\ETL\Transform\Transformer\Scalar\MaxLengthTransformer
               properties:
@@ -160,4 +160,4 @@ services:
           field: '_id'
           name: 'updatedAt'
           transformers:
-            - @antimattr.etl_transformer.notnull.notnull_date
+            - '@antimattr.etl_transformer.notnull.notnull_date'
